@@ -8,4 +8,4 @@ output/
 .pytest_cache/
 .env
 test_output/
-
+generated_project

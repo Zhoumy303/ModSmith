@@ -1,0 +1,20 @@
+package {{ package_name }};
+
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+
+public class ModItems {
+    {% for item in items %}
+    public static final Item {{ item.id | upper }} = register(ModItemIds.{{ item.id | upper }}, Item::new, new Item.Properties());
+    {% endfor %}
+
+    private static Item register(ResourceKey<Item> key, Function<Item.Properties, Item> factory, Item.Properties settings) {
+        Item item = factory.apply(settings.setId(key));
+        return Registry.register(BuiltInRegistries.ITEM, key, item);
+    }
+
+    public static void initialize() {
+        // Empty initialization to trigger class loading
+    }
+}
