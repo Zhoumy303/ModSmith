@@ -40,6 +40,7 @@ def run_gradle_build(project_dir: Path) -> BuildResult:
             cwd=str(project_dir),
             capture_output=True,
             text=True,
+            encoding="utf-8",
             timeout=300,
         )
         return BuildResult(

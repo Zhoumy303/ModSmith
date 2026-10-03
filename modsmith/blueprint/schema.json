@@ -13,12 +13,12 @@
     "mod_id": {
       "type": "string",
       "description": "Unique identifier of the mod. Only lowercase letters, digits, and hyphens, e.g. example-mod",
-      "pattern": "^[a-z][a-z0_9]*$"
+      "pattern": "^[a-z][a-z0-9_-]*$"
     },
     "package_name": {
       "type": "string",
       "description": "Java package name, e.g. com.example",
-      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+      "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_]*)*$"
     },
     "minecraft_version": {
       "type": "string",
@@ -38,7 +38,7 @@
           "id": {
             "type": "string",
             "description": "Unique item ID. Only lowercase letters, digits, and underscores, e.g. healing_apple",
-            "pattern": "^[a-z][a-z0-9_]*$"
+            "pattern": "^[a-z][a-z0-9_-]*$"
           },
           "type": {
             "type": "string",

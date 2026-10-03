@@ -1,29 +1,6 @@
 package {{ package_name }};
 
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-import net.fabricmc.fabric.api.registry.FuelValueEvents;
-import net.minecraft.world.item.CreativeModeTabs;
-
-public class ModItemsGenerated {
-    public static void initialize() {
-        // Trigger ModItems class loading
-        ModItems.initialize();
-
-{% if items %}
-        // Add items to the creative mode item group
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS)
-            .register(entries -> {
-{% for item in items %}
-                entries.accept(ModItems.{{ item.id | upper }});
-{% endfor %}
-            });
-{% endif %}
-    }
-}
-
-package {{ package_name }};
-
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
