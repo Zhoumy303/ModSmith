@@ -149,3 +149,46 @@ def generate_blueprint(user_input: str) -> dict:
     # Parse JSON
     blueprint = json.loads(response_text)
     return blueprint
+
+    ## Visual features must be proactively inferred by you
+
+When users describe a mod, they usually don't mention what the texture looks like. **You must infer a reasonable visual field based on the item's name, type, and effect.** Do not leave it empty, and do not output "auto".
+
+Inference method:
+
+1. **First look at name keywords**:
+   - Apple, berry, fruit, bread, meat → shape = round / organic
+   - Gem, crystal, diamond, ore, shard → shape = crystal
+   - Sword, blade, dagger → shape = blade
+   - Axe, pickaxe → shape = axe / pickaxe
+   - Potion, plasma, liquid, fuel → shape = liquid
+   - Ingot, block, metal → shape = ingot
+
+2. **Then look at effects to infer color**:
+   - Healing, regeneration → red family (#dc2626)
+   - Speed, night vision → cyan family (#22d3ee)
+   - Poison, wither → dark green / purple family (#4d7c0f / #7e22ce)
+   - Strength, attack → orange-red family (#ea580c)
+   - Luck, fortune → gold family (#f59e0b)
+   - Cold, frost → blue-white family (#93c5fd)
+
+3. **Finally look at name adjectives**:
+   - Sparkling, glowing → pattern = sparkle
+   - Mysterious, shadow → pattern = glow
+   - Cracked, ancient → pattern = cracks
+   - Pure, smooth → pattern = none
+
+4. **Fallback**: If none of the above can be inferred, use shape = abstract and infer primary_color from the item ID's hash.
+
+Examples:
+
+User input "Create an apple that heals when eaten"
+→ Name contains "apple" → shape = round
+→ Effect is "heal" → primary_color = #dc2626
+→ accent_color = #86efac (the green highlight of the fruit)
+→ pattern = sparkle
+
+User input "Make a sparkling diamond"
+→ Name contains "diamond" → shape = crystal
+→ Name contains "sparkling" → pattern = sparkle
+→ primary_color = #22d3ee (the cyan-blue of diamond)

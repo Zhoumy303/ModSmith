@@ -1,0 +1,13 @@
+{
+  "id": "ruby",
+  "type": "basic",
+  "display_name_en": "Ruby",
+  "display_name_zh": "红宝石",
+  "visual": {
+    "shape": "crystal",
+    "primary_color": "#dc2626",
+    "accent_color": "#fca5a5",
+    "pattern": "sparkle"
+  },
+  "texture": "auto"
+}
