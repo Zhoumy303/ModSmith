@@ -93,6 +93,7 @@ def render_project(blueprint: dict, output_dir: Path) -> None:
 
 from modsmith.generator.java import generate_java_items
 from modsmith.generator.resources import generate_resources
+from modsmith.generator.textures import generate_all_textures
 
 def generate_project(blueprint: dict, output_dir: Path) -> None:
     """根据蓝图生成完整的 Fabric 项目。
@@ -109,5 +110,9 @@ def generate_project(blueprint: dict, output_dir: Path) -> None:
 
     # 3. 生成资源文件
     generate_resources(blueprint, output_dir)
+    
+    generate_all_textures(blueprint, output_dir)
 
     print(f"✅ 项目已完整生成到: {output_dir}")
+
+    
