@@ -1,4 +1,5 @@
 """LLM client for generating blueprints from natural language."""
+from modsmith.config import MINECRAFT_VERSION, FABRIC_LOADER_VERSION
 
 import os
 import json
@@ -68,11 +69,31 @@ Your task is to generate a blueprint that conforms to the following JSON Schema 
 
     prompt += """## Rules
 
-1. Output JSON only. Do not include any explanation, comments, or Markdown code fences.
+1. Output JSON only. Do not include any explanation, comments, or Markdown code block markers.
 2. All required fields must be present.
 3. The `type` field can only be one of: basic, food, fuel, tool.
-4. If the description is ambiguous, use reasonable default values.
+4. If the description is unclear, use reasonable defaults.
 5. If the `texture` field cannot be determined, use "auto".
+
+## Required fields per type
+
+- **basic**: `id`, `type`, `display_name_en`
+- **food**: `id`, `type`, `display_name_en`, `nutrition`, `saturation`, `always_edible`
+- **fuel**: `id`, `type`, `display_name_en`, `burn_time`
+- **tool**: `id`, `type`, `display_name_en`, `tool_type`, `durability`, `mining_speed`, `attack_damage`
+
+## Suggested defaults
+
+- `saturation`: 0.3
+- `always_edible`: true
+- `effects`: empty array `[]`
+- `texture`: "auto"
+
+## Version requirements (must be strictly followed)
+
+- `minecraft_version` must be "{MINECRAFT_VERSION}"
+- `fabric_loader_version` must be "{FABRIC_LOADER_VERSION}"
+- Do not use any other version numbers.
 """
 
     return prompt
