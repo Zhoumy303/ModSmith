@@ -1,5 +1,17 @@
 """ModSmith Web UI: FastAPI-based backend service."""
+import asyncio
+import json
+import os
+import subprocess
+import uuid
+from pathlib import Path
+from typing import AsyncGenerator
 
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 import asyncio
 import json
 import os
@@ -20,7 +32,20 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # In-memory task storage: task_id -> state
 TASKS: dict[str, dict] = {}
+# In-memory Chat session storage: session_id -> [{role, content}]
+CHAT_SESSIONS: dict[str, list[dict]] = {}
 
+class ChatRequest(BaseModel):
+    session_id: str
+    message: str
+
+
+class ChatClearRequest(BaseModel):
+    session_id: str
+
+
+class ChatSummarizeRequest(BaseModel):
+    session_id: str
 
 class GenerateRequest(BaseModel):
     description: str
@@ -31,6 +56,127 @@ class GenerateRequest(BaseModel):
 class RunClientRequest(BaseModel):
     task_id: str
 
+# ============================================================
+# Chat mode
+# ============================================================
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest) -> dict:
+    """Append the user message to the session history and return success."""
+    if req.session_id not in CHAT_SESSIONS:
+        CHAT_SESSIONS[req.session_id] = []
+    CHAT_SESSIONS[req.session_id].append({"role": "user", "content": req.message})
+    return {"success": True, "session_id": req.session_id}
+
+
+@app.get("/api/chat/stream/{session_id}")
+async def chat_stream(session_id: str):
+    """Stream the Chat reply via SSE."""
+    if session_id not in CHAT_SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    async def event_generator() -> AsyncGenerator[dict, None]:
+        from modsmith.llm.chat import chat_response
+
+        history = CHAT_SESSIONS[session_id]
+        if not history or history[-1]["role"] != "user":
+            yield {"event": "error", "data": json.dumps({"message": "No pending message to answer"})}
+            return
+
+        user_message = history[-1]["content"]
+        prior = history[:-1]
+
+        loop = asyncio.get_event_loop()
+
+        def run_chat() -> str:
+            return chat_response(user_message, history=prior)
+
+        try:
+            answer = await loop.run_in_executor(None, run_chat)
+        except Exception as e:
+            yield {"event": "error", "data": json.dumps({"message": str(e)})}
+            return
+
+        history.append({"role": "assistant", "content": answer})
+
+        # Stream character by character (typewriter effect)
+        for ch in answer:
+            yield {"event": "chunk", "data": json.dumps({"text": ch})}
+            await asyncio.sleep(0.008)
+
+        yield {"event": "done", "data": json.dumps({"answer": answer})}
+
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/api/chat/clear")
+async def chat_clear(req: ChatClearRequest) -> dict:
+    """Clear the history of a session."""
+    CHAT_SESSIONS.pop(req.session_id, None)
+    return {"success": True}
+
+
+@app.post("/api/chat/summarize")
+async def chat_summarize(req: ChatSummarizeRequest) -> dict:
+    """Compress the conversation history into a requirement description for the Execute description box.
+
+    First tries to extract the 【Requirement Summary】 marker from the last assistant message;
+    if not found, calls the LLM once to generate a summary based on the history.
+    """
+    if req.session_id not in CHAT_SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    history = CHAT_SESSIONS[req.session_id]
+    if not history:
+        raise HTTPException(status_code=400, detail="Conversation is empty")
+
+    # 1. Prefer to extract the 【Requirement Summary】 marker
+    for msg in reversed(history):
+        if msg["role"] == "assistant" and "【Requirement Summary】" in msg["content"]:
+            text = msg["content"]
+            start = text.find("【Requirement Summary】") + len("【Requirement Summary】")
+            end = len(text)
+            for marker in ["Confirm", "Click", "Run", "\n\n"]:
+                idx = text.find(marker, start)
+                if idx != -1 and idx < end:
+                    end = idx
+            summary = text[start:end].strip()
+            if summary:
+                return {"summary": summary}
+
+    # 2. Fallback: call the LLM to generate a summary
+    from modsmith.llm.client import get_client, DEFAULT_MODEL
+
+    def _run() -> str:
+        client = get_client()
+        dialogue = "\n".join(
+            f"{'User' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
+            for m in history
+        )
+        prompt = f"""Please read the following conversation and summarize the mod the user wants in one sentence.
+Output only that sentence, without any explanation, JSON, or Markdown.
+
+Requirements:
+- Only describe what ModSmith can generate: basic items, food, tools
+- Include: type, name, effect (if any)
+- If there is no clear requirement in the conversation, output "unclear"
+
+Conversation:
+{dialogue}
+"""
+        message = client.messages.create(
+            model=DEFAULT_MODEL,
+            max_tokens=256,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return message.content[0].text.strip()
+
+    try:
+        summary = await asyncio.get_event_loop().run_in_executor(None, _run)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Summary generation failed: {e}")
+
+    return {"summary": summary}
 
 @app.get("/", response_class=HTMLResponse)
 async def index() -> HTMLResponse:
@@ -215,3 +361,5 @@ async def auto_verify(req: AutoVerifyRequest) -> dict:
         "message": result.message,
         "matched_lines": result.matched_lines,
     }
+
+    

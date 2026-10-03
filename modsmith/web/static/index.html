@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ModSmith · Forge Fabric mods from natural language</title>
+    <title>ModSmith · Forge Fabric Mods in Natural Language</title>
     <style>
         :root {
             --bg: #070b16;
@@ -27,17 +28,23 @@
             --radius: 16px;
             --radius-sm: 12px;
             --radius-xs: 8px;
-
-            /* Font stacks: use system fonts */
+            /* Font stack: prefer system fonts, avoid Google Fonts dependency */
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                         "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue",
-                         Helvetica, Arial, sans-serif;
+                "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue",
+                Helvetica, Arial, sans-serif;
             --font-mono: "SF Mono", "Menlo", "Monaco", "Consolas", "Liberation Mono",
-                         "Courier New", monospace;
+                "Courier New", monospace;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             font-family: var(--font-sans);
@@ -46,7 +53,6 @@
             line-height: 1.6;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
             position: relative;
         }
@@ -91,7 +97,7 @@
             background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent 70%);
         }
 
-        /* ============ Floating top capsule nav ============ */
+        /* ============ Floating top pill nav ============ */
         .topnav {
             position: fixed;
             top: 20px;
@@ -197,8 +203,49 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Language switch */
+        .lang-switch {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px;
+        }
+
+        .lang-switch button {
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .lang-switch button:hover {
+            color: var(--text-dim);
+        }
+
+        .lang-switch button.active {
+            color: #022c22;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-bright));
         }
 
         .topnav-github {
@@ -235,15 +282,14 @@
             padding: 120px 48px 80px;
         }
 
-        /* ============ Hero section (left-aligned big title) ============ */
+        /* ============ Hero ============ */
         .hero {
             display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 60px;
-            align-items: end;
-            margin-bottom: 80px;
-            padding-bottom: 40px;
-            border-bottom: 1px solid var(--border);
+            grid-template-columns: 1fr;
+            gap: 0;
+            align-items: start;
+            margin: 48px;
+            border-bottom: none;        
         }
 
         .hero-left .eyebrow {
@@ -270,7 +316,7 @@
             font-weight: 900;
             letter-spacing: -3px;
             line-height: 0.98;
-            margin-bottom: 24px;
+            margin-bottom: 10px;
         }
 
         .hero h1 .grad {
@@ -288,42 +334,361 @@
         .hero-lead {
             font-size: 16px;
             color: var(--text-dim);
-            max-width: 520px;
             line-height: 1.7;
         }
 
-        .hero-stats {
+        /* ============ Hero banner (HTML/CSS) ============ */
+        .hero-banner {
+            margin-bottom: 48px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg-soft);
+            box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(16, 185, 129, 0.04);
+            position: relative;
+            animation: bannerIn 0.6s ease-out;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            pointer-events: none;
+            box-shadow: inset 0 0 80px -20px rgba(16, 185, 129, 0.15);
+        }
+
+        @keyframes bannerIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stage: 16:9, drives all internal scaling via container queries */
+        .banner-stage {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            container-type: inline-size;
+            font-size: clamp(6px, 1.125cqw, 20px);
+            font-family: var(--font-sans);
+            background:
+                radial-gradient(circle at 80% 16%, rgba(110, 231, 168, 0.30), transparent 42%),
+                radial-gradient(circle at 22% 84%, rgba(139, 92, 246, 0.26), transparent 40%),
+                linear-gradient(135deg, #070b18 0%, #0e1a35 55%, #111b2e 100%);
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        /* Grid overlay */
+        .banner-stage::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(122, 162, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(122, 162, 255, 0.08) 1px, transparent 1px);
+            background-size: 2.5% 4.4444%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating blocky decorations */
+        .banner-deco {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .banner-deco span {
+            position: absolute;
+            border-radius: 0.6em;
+            opacity: 0.18;
+        }
+
+        .banner-deco span:nth-child(1) {
+            width: 4em;
+            height: 4em;
+            right: 12%;
+            bottom: 20%;
+            background: #6ee7a8;
+            transform: rotate(12deg);
+        }
+
+        .banner-deco span:nth-child(2) {
+            width: 2.7em;
+            height: 2.7em;
+            right: 4%;
+            bottom: 36%;
+            background: #8b5cf6;
+            transform: rotate(-10deg);
+        }
+
+        .banner-deco span:nth-child(3) {
+            width: 3.1em;
+            height: 3.1em;
+            left: 4%;
+            top: 12%;
+            background: #7dd3fc;
+            transform: rotate(-14deg);
+        }
+
+        /* ---- Shared card base ---- */
+        .banner-card {
+            position: absolute;
+            background: #101a33;
+            border: 1px solid #2a3b63;
+            border-radius: 1.55em;
+            box-shadow: 0 1em 2em -0.8em rgba(0, 0, 0, 0.7);
+            z-index: 1;
+            color: #c9d7f5;
+        }
+
+        /* ---- Chat card ---- */
+        .banner-chat {
+            left: 7.5%;
+            top: 37.78%;
+            width: 33.75%;
+            height: 33.33%;
+            padding: 1.67em;
             display: flex;
-            gap: 40px;
+            flex-direction: column;
+        }
+
+        .banner-chat-title {
+            color: #6ee7a8;
+            font-weight: 700;
+            font-size: 1em;
+            line-height: 1.2;
+        }
+
+        .banner-chat-input {
+            margin-top: 1em;
+            background: #18274a;
+            border: 1px solid #2c4370;
+            border-radius: 1.1em;
+            padding: 0.85em 1.4em;
+            color: #e8f0ff;
+            font-size: 1em;
+            font-weight: 500;
+            line-height: 1.45;
+            min-height: 5.55em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .banner-chat-input span {
+            display: block;
+        }
+
+        .banner-chat-hint {
+            color: #8fa4c8;
+            font-size: 0.8em;
+            line-height: 1.6;
+        }
+
+        .banner-chat-hint:first-of-type {
+            margin-top: 2.2em;
+        }
+
+        /* ---- Pipeline ---- */
+        .banner-pipeline {
+            position: absolute;
+            left: 42.5%;
+            top: 51.5%;
+            width: 16.5%;
+            display: flex;
+            align-items: flex-start;
+            z-index: 1;
+        }
+
+        .banner-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.55em;
             flex-shrink: 0;
         }
 
-        .hero-stat {
-            text-align: right;
-        }
-
-        .hero-stat-value {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: -1.5px;
+        .banner-step-circle {
+            width: 2.9em;
+            height: 2.9em;
+            border-radius: 50%;
+            background: #101a33;
+            border: 0.17em solid #6ee7a8;
+            color: #6ee7a8;
+            font-weight: 700;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             line-height: 1;
-            color: var(--text);
-            font-feature-settings: 'tnum';
         }
 
-        .hero-stat-value .unit {
-            font-size: 14px;
+        .banner-step-label {
+            color: #8fa4c8;
+            font-size: 0.78em;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .banner-step-line {
+            flex: 1;
+            height: 0.15em;
+            margin-top: 1.3em;
+            background-image: linear-gradient(90deg, #2f4a7a 55%, transparent 55%);
+            background-size: 0.55em 100%;
+            background-repeat: repeat-x;
+        }
+
+        /* ---- Code card ---- */
+        .banner-code {
+            left: 61.25%;
+            top: 34.44%;
+            width: 31.25%;
+            height: 42.22%;
+            background: #0b1326;
+            padding: 1.95em 2.2em;
+            overflow: hidden;
+        }
+
+        .banner-code-dots {
+            display: flex;
+            gap: 0.4em;
+            margin-bottom: 2.17em;
+        }
+
+        .banner-code-dots span {
+            width: 0.36em;
+            height: 0.36em;
+            border-radius: 50%;
+        }
+
+        .banner-code-dots .red {
+            background: #ef4444;
+        }
+
+        .banner-code-dots .yellow {
+            background: #fbbf24;
+        }
+
+        .banner-code-dots .green {
+            background: #22c55e;
+        }
+
+        .banner-code-body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.8em;
+            line-height: 1.55;
+            color: #c9d7f5;
+            white-space: pre;
+            margin: 0;
+        }
+
+        .banner-code-body .str {
+            color: #7dd3fc;
+        }
+
+        .banner-code-body .num {
+            color: #fbbf24;
+        }
+
+        /* ---- Apple icon ---- */
+        .banner-apple {
+            position: absolute;
+            right: 5%;
+            bottom: 6%;
+            width: 4.3em;
+            height: 4.3em;
+        }
+
+        .banner-apple-body {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0.55em;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ff6b6b 0%, #dc2626 55%, #b91c1c 100%);
+            box-shadow: inset -0.35em -0.45em 0.65em rgba(0, 0, 0, 0.35);
+        }
+
+        .banner-apple-body::before {
+            content: '';
+            position: absolute;
+            width: 1.1em;
+            height: 0.85em;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            left: 0.65em;
+            top: 0.75em;
+            filter: blur(0.1em);
+        }
+
+        .banner-apple-stem {
+            position: absolute;
+            width: 0.28em;
+            height: 0.95em;
+            background: #8b5e34;
+            border-radius: 0.15em;
+            top: 0.15em;
+            left: 1.95em;
+            transform: rotate(10deg);
+            transform-origin: bottom center;
+        }
+
+        .banner-apple-leaf {
+            position: absolute;
+            width: 1.6em;
+            height: 0.9em;
+            background: #22c55e;
+            border-radius: 1.6em 0.3em 1.6em 0.3em;
+            top: 0.05em;
+            left: 2.15em;
+            transform: rotate(-25deg);
+            transform-origin: left center;
+        }
+
+        /* ---- Bottom pills ---- */
+        .banner-pills {
+            position: absolute;
+            left: 7.5%;
+            top: 80%;
+            display: flex;
+            align-items: center;
+            gap: 0.9em;
+            z-index: 1;
+        }
+
+        .banner-pill {
+            height: 2.55em;
+            min-width: 6.6em;
+            padding: 0 1.3em;
+            border-radius: 999px;
+            background: #13203d;
+            border: 1px solid #2b3f6b;
+            color: #bcd0f0;
+            font-size: 0.95em;
             font-weight: 600;
-            color: var(--emerald-bright);
-            margin-left: 2px;
-            letter-spacing: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .hero-stat-label {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            letter-spacing: 0.3px;
+        .banner-pill-note {
+            color: #8fa4c8;
+            font-size: 1em;
+            font-weight: 500;
+            margin-left: 1.2em;
+            white-space: nowrap;
         }
 
         /* ============ Workspace grid ============ */
@@ -334,7 +699,7 @@
             align-items: start;
         }
 
-        /* ============ Card ============ */
+        /* ============ Cards ============ */
         .card {
             background: linear-gradient(180deg, var(--surface) 0%, var(--bg-soft) 100%);
             border: 1px solid var(--border);
@@ -409,7 +774,7 @@
             border-color: rgba(16, 185, 129, 0.3);
         }
 
-        /* ============ Input section ============ */
+        /* ============ Input area ============ */
         .examples {
             display: flex;
             flex-wrap: wrap;
@@ -436,8 +801,13 @@
             transform: translateY(-1px);
         }
 
-        .field { margin-bottom: 16px; }
-        .field:last-child { margin-bottom: 0; }
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field:last-child {
+            margin-bottom: 0;
+        }
 
         .field label {
             display: block;
@@ -470,7 +840,9 @@
         }
 
         .field input::placeholder,
-        .field textarea::placeholder { color: var(--text-muted); }
+        .field textarea::placeholder {
+            color: var(--text-muted);
+        }
 
         .field textarea {
             height: 100px;
@@ -509,7 +881,9 @@
             box-shadow: 0 12px 28px -8px rgba(16, 185, 129, 0.7);
         }
 
-        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
 
         .btn:disabled {
             opacity: 0.4;
@@ -517,7 +891,9 @@
             box-shadow: none;
         }
 
-        .btn-full { width: 100%; }
+        .btn-full {
+            width: 100%;
+        }
 
         .btn-secondary {
             background: var(--surface-2);
@@ -576,9 +952,17 @@
             border-radius: 50%;
         }
 
-        .terminal-dot.red { background: #ff5f57; }
-        .terminal-dot.yellow { background: #ffbd2e; }
-        .terminal-dot.green { background: #28c840; }
+        .terminal-dot.red {
+            background: #ff5f57;
+        }
+
+        .terminal-dot.yellow {
+            background: #ffbd2e;
+        }
+
+        .terminal-dot.green {
+            background: #28c840;
+        }
 
         .terminal-title {
             font-size: 11px;
@@ -600,14 +984,20 @@
             word-break: break-word;
         }
 
-        .terminal-body::-webkit-scrollbar { width: 8px; }
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
         .terminal-body::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 4px;
         }
-        .terminal-body::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
-        /* ============ Preview (with tabs) ============ */
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--border-light);
+        }
+
+        /* ============ Preview (tabs) ============ */
         .preview-tabs {
             display: flex;
             gap: 4px;
@@ -632,7 +1022,9 @@
             transition: all 0.15s;
         }
 
-        .preview-tab:hover { color: var(--text-dim); }
+        .preview-tab:hover {
+            color: var(--text-dim);
+        }
 
         .preview-tab.active {
             background: var(--surface-2);
@@ -655,14 +1047,22 @@
             word-break: break-word;
         }
 
-        .preview-content::-webkit-scrollbar { width: 8px; }
+        .preview-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
         .preview-content::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 4px;
         }
 
-        .preview-panel { display: none; }
-        .preview-panel.active { display: block; }
+        .preview-panel {
+            display: none;
+        }
+
+        .preview-panel.active {
+            display: block;
+        }
 
         /* ============ Download list ============ */
         .download-grid {
@@ -752,7 +1152,7 @@
             transform: translateX(3px);
         }
 
-        /* ============ Verification messages ============ */
+        /* ============ Verify messages ============ */
         #verify-msg {
             margin-top: 16px;
             font-size: 12.5px;
@@ -761,9 +1161,20 @@
             font-family: var(--font-mono);
         }
 
-        #verify-msg .ok { color: var(--emerald-bright); font-weight: 600; }
-        #verify-msg .fail { color: var(--red); font-weight: 600; }
-        #verify-msg .warn { color: var(--amber); font-weight: 600; }
+        #verify-msg .ok {
+            color: var(--emerald-bright);
+            font-weight: 600;
+        }
+
+        #verify-msg .fail {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        #verify-msg .warn {
+            color: var(--amber);
+            font-weight: 600;
+        }
 
         #verify-msg code {
             display: inline-block;
@@ -776,8 +1187,10 @@
             margin: 2px 0;
         }
 
-        /* ============ Hidden / hints ============ */
-        .hidden { display: none !important; }
+        /* ============ Hidden / hint ============ */
+        .hidden {
+            display: none !important;
+        }
 
         .hint {
             font-size: 12px;
@@ -832,25 +1245,408 @@
             transition: color 0.15s;
         }
 
-        .footer-links a:hover { color: var(--emerald-bright); }
+        .footer-links a:hover {
+            color: var(--emerald-bright);
+        }
+
+        /* ============ Mode tabs ============ */
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 32px;
+            width: fit-content;
+        }
+
+        .mode-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: transparent;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .mode-tab:hover {
+            color: var(--text);
+            background: var(--surface-2);
+        }
+
+        .mode-tab.active {
+            color: #022c22;
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+            box-shadow: 0 4px 12px -4px var(--emerald-glow);
+        }
+
+        .mode-tab .tab-icon {
+            font-size: 15px;
+        }
+
+        .mode-panel {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============ Chat ============ */
+        .chat-card {
+            background: linear-gradient(180deg, var(--surface) 0%, var(--bg-soft) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 380px);
+            min-height: 520px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(13, 19, 34, 0.5);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px var(--emerald-glow);
+        }
+
+        .chat-title {
+            font-size: 14.5px;
+            font-weight: 600;
+        }
+
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .chat-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 6px var(--emerald);
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-action-btn {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-dim);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .chat-action-btn:hover {
+            color: var(--emerald-bright);
+            border-color: var(--emerald);
+            background: var(--emerald-glow);
+        }
+
+        .chat-action-btn.primary {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #022c22;
+            border: none;
+            font-weight: 700;
+            box-shadow: 0 4px 12px -4px var(--emerald-glow);
+        }
+
+        .chat-action-btn.primary:hover {
+            color: #022c22;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px -4px var(--emerald-glow);
+        }
+
+        .chat-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .chat-message.assistant .avatar {
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-bright));
+        }
+
+        .chat-message.user .avatar {
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+        }
+
+        .chat-message .bubble {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .chat-message.assistant .bubble {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+
+        .chat-message.user .bubble {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-top-right-radius: 4px;
+        }
+
+        .chat-message .bubble code {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--emerald-bright);
+        }
+
+        .chat-message .bubble pre {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: rgba(13, 19, 34, 0.5);
+            align-items: flex-end;
+        }
+
+        .chat-input-area textarea {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            padding: 12px 16px;
+            resize: none;
+            max-height: 160px;
+            line-height: 1.5;
+            transition: all 0.15s;
+        }
+
+        .chat-input-area textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 4px var(--emerald-glow);
+        }
+
+        .chat-send-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #022c22;
+            border: none;
+            padding: 12px 20px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: inherit;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 4px 12px -4px var(--emerald-glow);
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px -4px var(--emerald-glow);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn .send-icon {
+            font-size: 15px;
+            opacity: 0.7;
+        }
+
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 24px 20px;
+        }
+
+        .suggestion-chip {
+            font-size: 12px;
+            color: var(--text-dim);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .suggestion-chip:hover {
+            color: var(--emerald-bright);
+            border-color: var(--emerald);
+            background: var(--emerald-glow);
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
 
         /* ============ Responsive ============ */
         @media (max-width: 1100px) {
             .hero {
-                grid-template-columns: 1fr;
-                gap: 32px;
-                align-items: start;
+                gap: 24px;
             }
-            .hero-stats { justify-content: flex-start; }
-            .hero-stat { text-align: left; }
         }
 
         @media (max-width: 900px) {
             .workspace {
                 grid-template-columns: 1fr;
             }
-            .page { padding: 100px 20px 60px; }
-            .footer { padding: 24px 20px 0; }
+
+            .page {
+                padding: 100px 20px 60px;
+            }
+
+            .footer {
+                padding: 24px 20px 0;
+            }
         }
 
         @media (max-width: 640px) {
@@ -858,25 +1654,35 @@
                 padding: 6px 8px 6px 12px;
                 gap: 10px;
             }
+
             .topnav-links a,
             .topnav-status span {
                 display: none;
             }
-            .topnav-divider { display: none; }
-            .field-row { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 40px; letter-spacing: -1.5px; }
-            .hero-stats { gap: 24px; }
-            .hero-stat-value { font-size: 26px; }
+
+            .topnav-divider {
+                display: none;
+            }
+
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+                letter-spacing: -1.5px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- Background -->
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
 
-    <!-- Floating top capsule -->
+    <!-- Floating top pill nav -->
     <nav class="topnav">
         <a href="/" class="topnav-brand">
             <div class="topnav-logo">⚒</div>
@@ -884,18 +1690,19 @@
             <span class="topnav-badge">BETA</span>
         </a>
         <div class="topnav-divider"></div>
-        <div class="topnav-links">
-            <a href="#workspace">Generate</a>
-            <a href="#verify">Verify</a>
-        </div>
-        <div class="topnav-divider"></div>
         <div class="topnav-status">
             <span class="dot"></span>
-            <span>Service running</span>
+            <span data-i18n="nav.status">Service running</span>
         </div>
-        <a href="https://github.com/Zhoumy303/ModSmith" target="_blank" rel="noopener" class="topnav-github" title="GitHub">
+        <div class="lang-switch" role="group" aria-label="Language">
+            <button type="button" data-lang="en" onclick="setLang('en')">EN</button>
+            <button type="button" data-lang="zh" onclick="setLang('zh')">中</button>
+        </div>
+        <a href="https://github.com/Zhoumy303/ModSmith" target="_blank" rel="noopener" class="topnav-github"
+            title="GitHub">
             <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                <path
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
             </svg>
         </a>
     </nav>
@@ -903,236 +1710,600 @@
     <div class="page">
 
         <!-- Hero -->
-        <section class="hero">
-            <div class="hero-left">
-                <div class="eyebrow">AI-Native Fabric Mod Generator</div>
-                <h1>
-                    Forge <span class="grad">Fabric</span> mods<br>
-                    from <span class="outline">natural language</span>
-                </h1>
-                <p class="hero-lead">
-                    Describe your idea, and ModSmith automatically generates a blueprint,
-                    compiles the project, packages the output, and helps you verify it in-game.
-                </p>
-            </div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="hero-stat-value">1<span class="unit">min</span></div>
-                    <div class="hero-stat-label">From idea to mod</div>
+
+
+        <!-- Hero banner (HTML/CSS) -->
+        <section class="hero-banner" aria-label="ModSmith overview">
+            <div class="banner-stage">
+                <!-- Floating blocky decorations -->
+                <div class="banner-deco" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">3<span class="unit">types</span></div>
-                    <div class="hero-stat-label">Item types</div>
+                <section class="hero">
+                    <div class="hero-left">
+                        <h1 data-i18n-html="hero.title">
+                            Forge <span class="grad">Minecraft</span><br>
+                            <span class="outline">Mods</span> with Natural Language
+                        </h1>
+                        <p class="hero-lead" data-i18n="hero.lead">
+                            Describe your idea. ModSmith generates the blueprint, compiles the project,
+                            packages the output, and verifies in-game that your mod actually loads.
+                        </p>
+                    </div>
+                </section>
+                <!-- Chat card -->
+                <div class="banner-card banner-chat">
+                    <div class="banner-chat-title">Chat Mode</div>
+                    <div class="banner-chat-input">
+                        <span>Create a glowing apple that</span>
+                        <span>restores 4 hunger points.</span>
+                    </div>
+                    <div class="banner-chat-hint">Natural language → Blueprint</div>
+                    <div class="banner-chat-hint">Chat first, then Execute.</div>
                 </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">100<span class="unit">%</span></div>
-                    <div class="hero-stat-label">Open source</div>
+
+                <!-- Pipeline -->
+                <div class="banner-pipeline" aria-hidden="true">
+                    <div class="banner-step">
+                        <div class="banner-step-circle">1</div>
+                        <div class="banner-step-label">Blueprint</div>
+                    </div>
+                    <div class="banner-step-line"></div>
+                    <div class="banner-step">
+                        <div class="banner-step-circle">2</div>
+                        <div class="banner-step-label">Validate</div>
+                    </div>
+                    <div class="banner-step-line"></div>
+                    <div class="banner-step">
+                        <div class="banner-step-circle">3</div>
+                        <div class="banner-step-label">Generate</div>
+                    </div>
+                </div>
+
+                <!-- Code card -->
+                <div class="banner-card banner-code">
+                    <div class="banner-code-dots">
+                        <span class="red"></span>
+                        <span class="yellow"></span>
+                        <span class="green"></span>
+                    </div>
+                    <pre class="banner-code-body">ModItems.register(
+  <span class="str">"healing_apple"</span>,
+  new Item(new Item.Properties()
+    .food(new FoodProperties.Builder()
+      .nutrition(<span class="num">4</span>)
+      .saturationModifier(<span class="num">0.3f</span>)
+      .build()))
+);</pre>
+                    <!-- Apple icon -->
+                    <div class="banner-apple" aria-hidden="true">
+                        <span class="banner-apple-stem"></span>
+                        <span class="banner-apple-leaf"></span>
+                        <span class="banner-apple-body"></span>
+                    </div>
+                </div>
+
+                <!-- Bottom pills -->
+                <div class="banner-pills">
+                    <span class="banner-pill">basic</span>
+                    <span class="banner-pill">food</span>
+                    <span class="banner-pill">tool</span>
+                    <span class="banner-pill-note">Web UI: Chat + Execute</span>
                 </div>
             </div>
         </section>
 
-        <!-- Workspace grid -->
-        <div class="workspace" id="workspace">
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="chat" onclick="switchMode('chat', this)">
+                <span class="tab-icon">💬</span> <span data-i18n="mode.chat">Chat</span>
+            </button>
+            <button class="mode-tab" data-mode="execute" onclick="switchMode('execute', this)">
+                <span class="tab-icon">⚡</span> <span data-i18n="mode.execute">Execute</span>
+            </button>
+        </div>
 
-            <!-- Input card -->
-            <div class="card" id="generate">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-icon">✨</div>
-                        <div>
-                            <div class="card-title">Describe your mod</div>
-                            <div class="card-subtitle">Say what you want in one sentence</div>
+        <div id="mode-execute" class="mode-panel">
+            <!-- Workspace grid -->
+            <div class="workspace" id="workspace">
+
+                <!-- Input card -->
+                <div class="card" id="generate">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-icon">✨</div>
+                            <div>
+                                <div class="card-title" data-i18n="gen.title">Describe Your Mod</div>
+                                <div class="card-subtitle" data-i18n="gen.subtitle">Say what you want in one sentence
+                                </div>
+                            </div>
                         </div>
+                        <span class="card-badge" id="gen-status" data-i18n="status.idle">Idle</span>
                     </div>
-                    <span class="card-badge" id="gen-status">Idle</span>
-                </div>
 
-                <div class="examples">
-                    <button class="example-chip" onclick="fillExample('Create an apple that restores 4 hunger points when eaten')">🍎 Healing apple</button>
-                    <button class="example-chip" onclick="fillExample('Create a Guidite sword with 455 durability')">⚔️ Guidite sword</button>
-                    <button class="example-chip" onclick="fillExample('Create a basic item called Ruby')">💎 Ruby</button>
-                </div>
+                    <div class="examples">
+                        <button class="example-chip" data-i18n="gen.chip1" onclick="fillExample(this)">🍎 Apple that
+                            restores hunger</button>
+                        <button class="example-chip" data-i18n="gen.chip2" onclick="fillExample(this)">⚔️ Sword with 455
+                            durability</button>
+                        <button class="example-chip" data-i18n="gen.chip3" onclick="fillExample(this)">💎 Basic item
+                            named Ruby</button>
+                    </div>
 
-                <div class="field">
-                    <textarea id="description" placeholder="e.g.: Create an apple that restores 4 hunger points when eaten"></textarea>
-                </div>
-                <div class="field-row">
                     <div class="field">
-                        <label for="mod_id">Mod ID</label>
-                        <input id="mod_id" value="example-mod">
+                        <textarea id="description" data-i18n-placeholder="gen.placeholder"
+                            placeholder="e.g. Create an apple that restores 4 hunger points when eaten"></textarea>
                     </div>
-                    <div class="field">
-                        <label for="package_name">Package name</label>
-                        <input id="package_name" value="com.example">
-                    </div>
-                </div>
-                <button id="generate-btn" class="btn btn-full" onclick="generate()">
-                    <span>⚡</span> Generate mod
-                </button>
-                <p class="hint">
-                    <span>💡</span>
-                    Generation calls the LLM, compiles the project, and packages it. Usually takes 1–3 minutes.
-                </p>
-            </div>
-
-            <!-- Log card -->
-            <div class="card" id="log-card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-icon">📋</div>
-                        <div>
-                            <div class="card-title">Real-time log</div>
-                            <div class="card-subtitle">Each step of the generation</div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="mod_id" data-i18n="gen.modid">Mod ID</label>
+                            <input id="mod_id" value="example-mod">
+                        </div>
+                        <div class="field">
+                            <label for="package_name" data-i18n="gen.package">Package</label>
+                            <input id="package_name" value="com.example">
                         </div>
                     </div>
-                </div>
-                <div class="terminal">
-                    <div class="terminal-bar">
-                        <div class="terminal-dots">
-                            <span class="terminal-dot red"></span>
-                            <span class="terminal-dot yellow"></span>
-                            <span class="terminal-dot green"></span>
-                        </div>
-                        <span class="terminal-title">modsmith — output</span>
-                    </div>
-                    <div id="log" class="terminal-body"></div>
-                </div>
-            </div>
-
-            <!-- Preview card -->
-            <div id="content-section" class="card hidden">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-icon">📄</div>
-                        <div>
-                            <div class="card-title">Generated content preview</div>
-                            <div class="card-subtitle">Blueprint and README</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="preview-tabs">
-                    <button class="preview-tab active" onclick="switchTab('blueprint', this)">Blueprint · blueprint.json</button>
-                    <button class="preview-tab" onclick="switchTab('readme', this)">README</button>
-                </div>
-                <div class="preview-panel active" id="panel-blueprint">
-                    <pre class="preview-content" id="blueprint-view"></pre>
-                </div>
-                <div class="preview-panel" id="panel-readme">
-                    <pre class="preview-content" id="readme-view"></pre>
-                </div>
-            </div>
-
-            <!-- Download + verify cards -->
-            <div class="card hidden" id="downloads-card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-icon">📦</div>
-                        <div>
-                            <div class="card-title">Downloads</div>
-                            <div class="card-subtitle">Click to download locally</div>
-                        </div>
-                    </div>
-                </div>
-                <div id="downloads" class="download-grid"></div>
-            </div>
-
-            <div id="verify-section" class="card hidden">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-icon">🎮</div>     
-                    <button id="auto-verify-btn" onclick="autoVerify()" style="margin-left: 8px;">🔍 Auto Verify</button>
-                        <div>
-                            <div class="card-title">In-game verification</div>
-                            <div class="card-subtitle">Launch and check if the mod works</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="btn-row">
-                    <button id="verify-btn" class="btn btn-secondary" onclick="runClient()">
-                        🎮 Launch game
+                    <button id="generate-btn" class="btn btn-full" onclick="generate()">
+                        <span>⚡</span> <span data-i18n="btn.generate">Generate Mod</span>
                     </button>
-                    <button id="auto-verify-btn" class="btn btn-secondary" onclick="autoVerify()">
-                        🔍 Log verification
+                    <p class="hint">
+                        <span>💡</span>
+                        <span data-i18n="gen.hint">Generation calls the LLM, compiles the project and packages it.
+                            Usually takes 1–3 minutes.</span>
+                    </p>
+                </div>
+
+                <!-- Log card -->
+                <div class="card" id="log-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-icon">📋</div>
+                            <div>
+                                <div class="card-title" data-i18n="log.title">Live Log</div>
+                                <div class="card-subtitle" data-i18n="log.subtitle">Every step of generation</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="terminal">
+                        <div class="terminal-bar">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot red"></span>
+                                <span class="terminal-dot yellow"></span>
+                                <span class="terminal-dot green"></span>
+                            </div>
+                            <span class="terminal-title" data-i18n="log.term">modsmith — output</span>
+                        </div>
+                        <div id="log" class="terminal-body"></div>
+                    </div>
+                </div>
+
+                <!-- Preview card -->
+                <div id="content-section" class="card hidden">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-icon">📄</div>
+                            <div>
+                                <div class="card-title" data-i18n="preview.title">Generated Content</div>
+                                <div class="card-subtitle" data-i18n="preview.subtitle">Blueprint & README</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-tabs">
+                        <button class="preview-tab active" onclick="switchTab('blueprint', this)">
+                            <span data-i18n="preview.tab1">Blueprint · blueprint.json</span>
+                        </button>
+                        <button class="preview-tab" onclick="switchTab('readme', this)">
+                            <span data-i18n="preview.tab2">README</span>
+                        </button>
+                    </div>
+                    <div class="preview-panel active" id="panel-blueprint">
+                        <pre class="preview-content" id="blueprint-view"></pre>
+                    </div>
+                    <div class="preview-panel" id="panel-readme">
+                        <pre class="preview-content" id="readme-view"></pre>
+                    </div>
+                </div>
+
+                <!-- Downloads + verify card -->
+                <div class="card hidden" id="downloads-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-icon">📦</div>
+                            <div>
+                                <div class="card-title" data-i18n="dl.title">Downloads</div>
+                                <div class="card-subtitle" data-i18n="dl.subtitle">Click to download</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="downloads" class="download-grid"></div>
+                </div>
+
+                <div id="verify-section" class="card hidden">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="card-icon">🎮</div>
+                            <div>
+                                <div class="card-title" data-i18n="verify.title">In-Game Verification</div>
+                                <div class="card-subtitle" data-i18n="verify.subtitle">Launch and check the mod</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button id="verify-btn" class="btn btn-secondary" onclick="runClient()">
+                            🎮 <span data-i18n="verify.run">Launch Game</span>
+                        </button>
+                        <button id="auto-verify-btn" class="btn btn-secondary" onclick="autoVerify()">
+                            🔍 <span data-i18n="verify.auto">Log Verification</span>
+                        </button>
+                    </div>
+                    <div id="verify-msg"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="mode-chat" class="mode-panel" style="display: none;">
+            <div class="chat-card">
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="chat-avatar">🤖</div>
+                        <div>
+                            <div class="chat-title" data-i18n="chat.title">Requirements Advisor</div>
+                            <div class="chat-status">
+                                <span class="dot"></span>
+                                <span data-i18n="chat.status">Online · Let's clarify your idea</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="chat-action-btn" onclick="clearChat()" title="Clear">
+                            🗑 <span data-i18n="chat.clear">Clear</span>
+                        </button>
+                        <button class="chat-action-btn primary" onclick="summarizeToExecute(event)" title="Summarize">
+                            ⚡ <span data-i18n="chat.summarize">Summarize</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-messages" class="chat-messages"></div>
+
+                <div class="chat-input-area">
+                    <textarea id="chat-input" data-i18n-placeholder="chat.placeholder"
+                        placeholder="Tell me what you'd like to build — e.g. a candy that makes you fly" rows="1"
+                        onkeydown="handleChatKeydown(event)"></textarea>
+                    <button id="chat-send-btn" class="chat-send-btn" onclick="sendChat()">
+                        <span data-i18n="chat.send">Send</span>
+                        <span class="send-icon">↵</span>
                     </button>
                 </div>
-                <div id="verify-msg"></div>
-            </div>
 
+                <div class="chat-suggestions">
+                    <button class="suggestion-chip" data-i18n="chat.chip1" onclick="quickAsk(this)">🍎 I want to make a
+                        new food</button>
+                    <button class="suggestion-chip" data-i18n="chat.chip2" onclick="quickAsk(this)">⚔️ I want to make a
+                        special tool</button>
+                    <button class="suggestion-chip" data-i18n="chat.chip3" onclick="quickAsk(this)">💡 I have an idea
+                        but
+                        don't know where to start</button>
+                </div>
+            </div>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-brand">
                 <div class="logo">⚒</div>
-                <span>ModSmith · Forge Fabric mods from natural language</span>
+                <span data-i18n="footer.brand">ModSmith · Forge Fabric mods in natural language</span>
             </div>
             <div class="footer-links">
                 <a href="https://github.com/Zhoumy303/ModSmith" target="_blank" rel="noopener">GitHub</a>
-                <a href="https://github.com/Zhoumy303/ModSmith/issues" target="_blank" rel="noopener">Report an issue</a>
+                <a href="https://github.com/Zhoumy303/ModSmith/issues" target="_blank" rel="noopener"
+                    data-i18n="footer.issues">Report Issue</a>
             </div>
         </footer>
 
     </div>
 
     <script>
+        // ============================================================
+        // i18n
+        // ============================================================
+
+        const I18N = {
+            en: {
+                'nav.generate': 'Generate',
+                'nav.verify': 'Verify',
+                'nav.status': 'Service running',
+
+                'hero.eyebrow': 'AI-Native Fabric Mod Generator',
+                'hero.title': 'Forge <span class="grad">Minecraft</span><br><span class="outline">Mods</span> with Natural Language',
+                'hero.lead': 'Describe your idea. ModSmith generates the blueprint, compiles the project, packages the output, and verifies in-game that your mod actually loads.',
+
+                'mode.chat': 'Chat',
+                'mode.execute': 'Execute',
+
+                'gen.title': 'Describe Your Mod',
+                'gen.subtitle': 'Say what you want in one sentence',
+                'gen.chip1': '🍎 Apple that restores hunger',
+                'gen.chip2': '⚔️ Sword with 455 durability',
+                'gen.chip3': '💎 Basic item named Ruby',
+                'gen.placeholder': 'e.g. Create an apple that restores 4 hunger points when eaten',
+                'gen.modid': 'Mod ID',
+                'gen.package': 'Package',
+                'gen.hint': 'Generation calls the LLM, compiles the project and packages it. Usually takes 1–3 minutes.',
+
+                'log.title': 'Live Log',
+                'log.subtitle': 'Every step of generation',
+                'log.term': 'modsmith — output',
+
+                'preview.title': 'Generated Content',
+                'preview.subtitle': 'Blueprint & README',
+                'preview.tab1': 'Blueprint · blueprint.json',
+                'preview.tab2': 'README',
+
+                'dl.title': 'Downloads',
+                'dl.subtitle': 'Click to download',
+                'dl.tag.jar': 'Installable mod',
+                'dl.tag.zip': 'Project source',
+                'dl.tag.json': 'Blueprint file',
+                'dl.tag.file': 'File',
+
+                'verify.title': 'In-Game Verification',
+                'verify.subtitle': 'Launch and check the mod',
+                'verify.run': 'Launch Game',
+                'verify.auto': 'Log Verification',
+
+                'chat.title': 'Requirements Advisor',
+                'chat.status': "Online · Let's clarify your idea",
+                'chat.clear': 'Clear',
+                'chat.summarize': 'Summarize',
+                'chat.placeholder': "Tell me what you'd like to build — e.g. a candy that makes you fly",
+                'chat.send': 'Send',
+                'chat.chip1': '🍎 I want to make a new food',
+                'chat.chip2': '⚔️ I want to make a special tool',
+                'chat.chip3': "💡 I have an idea but don't know where to start",
+
+                'footer.brand': 'ModSmith · Forge Fabric mods in natural language',
+                'footer.issues': 'Report Issue',
+
+                'status.idle': 'Idle',
+                'status.running': 'Running',
+                'status.done': 'Done',
+                'status.failed': 'Failed',
+
+                'btn.generate': 'Generate Mod',
+                'btn.generating': 'Generating…',
+                'btn.summarizing': 'Summarizing…',
+
+                'msg.noDescription': 'Please enter a mod description.',
+                'msg.taskFailed': '❌ Task failed',
+                'msg.requestFailed': '❌ Request failed: ',
+                'msg.launching': 'Launching game, please wait…',
+                'msg.launchFailed': 'Launch failed',
+                'msg.verifying': 'Launching game and auto-verifying, may take 1–3 minutes…',
+                'msg.nonJson': 'Backend returned non-JSON',
+                'msg.verifyFailed': 'Verification failed',
+                'msg.modLoaded': 'Mod loaded',
+                'msg.itemRegistered': 'Item registered',
+                'msg.matchedLogs': 'Matched log lines:',
+
+                'chat.emptyAlert': 'No conversation yet. Say something first.',
+                'chat.summaryFailed': 'Failed to summarize: ',
+                'chat.noSummary': 'No clear requirement yet. Chat a bit more, or try rephrasing.',
+                'chat.confirmClear': 'Clear the conversation history?',
+                'chat.replyFailed': '❌ Reply failed. Check backend logs.',
+                'chat.requestFailed': '❌ Request failed: ',
+                'chat.unknownError': 'Unknown error',
+
+                'page.title': 'ModSmith · Forge Fabric Mods in Natural Language',
+            },
+            zh: {
+                'nav.generate': '生成',
+                'nav.verify': '验证',
+                'nav.status': '服务运行中',
+
+                'hero.eyebrow': 'AI 驱动的 Fabric 模组生成器',
+                'hero.title': '用自然语言<br><span class="grad">锻造</span> <span class="outline">Minecraft</span> 模组',
+                'hero.lead': '描述你的想法，ModSmith 自动生成蓝图、编译项目、打包输出，并帮你在游戏中验证模组是否正常运行。',
+
+                'mode.chat': '概念问答',
+                'mode.execute': '生成模组',
+
+                'gen.title': '描述你的模组',
+                'gen.subtitle': '用一句话说出你想要的东西',
+                'gen.chip1': '🍎 恢复饥饿的苹果',
+                'gen.chip2': '⚔️ 耐久 455 的基迪特剑',
+                'gen.chip3': '💎 名为红宝石的基础物品',
+                'gen.placeholder': '例如：创建一个吃了恢复 4 点饥饿值的苹果',
+                'gen.modid': '模组 ID',
+                'gen.package': '包名',
+                'gen.hint': '生成会调用 LLM 生成蓝图、编译项目并打包，通常需要 1–3 分钟。',
+
+                'log.title': '实时日志',
+                'log.subtitle': '生成过程的每一步',
+                'log.term': 'modsmith — 输出',
+
+                'preview.title': '生成内容预览',
+                'preview.subtitle': '蓝图与 README',
+                'preview.tab1': '蓝图 · blueprint.json',
+                'preview.tab2': 'README',
+
+                'dl.title': '下载产物',
+                'dl.subtitle': '点击下载到本地',
+                'dl.tag.jar': '可安装模组',
+                'dl.tag.zip': '项目源码',
+                'dl.tag.json': '蓝图文件',
+                'dl.tag.file': '文件',
+
+                'verify.title': '游戏内验证',
+                'verify.subtitle': '启动并检查模组是否正常',
+                'verify.run': '启动游戏',
+                'verify.auto': '日志验证',
+
+                'chat.title': '需求顾问',
+                'chat.status': '在线 · 帮你说清楚想做什么',
+                'chat.clear': '清空',
+                'chat.summarize': '整理需求',
+                'chat.placeholder': '说说你想做个什么样的东西，比如：我想做一个吃了会飞的糖果',
+                'chat.send': '发送',
+                'chat.chip1': '🍎 我想做一个新食物',
+                'chat.chip2': '⚔️ 我想做一把特别的工具',
+                'chat.chip3': '💡 我有个想法但不知道从哪说起',
+
+                'footer.brand': 'ModSmith · 用自然语言锻造 Fabric 模组',
+                'footer.issues': '反馈问题',
+
+                'status.idle': '待命',
+                'status.running': '进行中',
+                'status.done': '已完成',
+                'status.failed': '失败',
+
+                'btn.generate': '生成模组',
+                'btn.generating': '生成中…',
+                'btn.summarizing': '整理中…',
+
+                'msg.noDescription': '请填写模组描述',
+                'msg.taskFailed': '❌ 任务失败',
+                'msg.requestFailed': '❌ 请求失败: ',
+                'msg.launching': '正在启动游戏，请稍候…',
+                'msg.launchFailed': '启动失败',
+                'msg.verifying': '正在启动游戏并自动验证，可能需要 1–3 分钟…',
+                'msg.nonJson': '后端返回非 JSON',
+                'msg.verifyFailed': '验证失败',
+                'msg.modLoaded': '模组加载',
+                'msg.itemRegistered': '物品注册',
+                'msg.matchedLogs': '匹配到的日志：',
+
+                'chat.emptyAlert': '还没有对话内容，先聊点什么吧。',
+                'chat.summaryFailed': '整理需求失败：',
+                'chat.noSummary': '对话里还没有明确的需求。再多聊两句，或者换个说法试试～',
+                'chat.confirmClear': '确定要清空对话历史吗？',
+                'chat.replyFailed': '❌ 回答失败，请检查后端日志。',
+                'chat.requestFailed': '❌ 请求失败：',
+                'chat.unknownError': '未知错误',
+
+                'page.title': 'ModSmith · 用自然语言锻造 Fabric 模组',
+            },
+        };
+
+        const LANG_STORAGE_KEY = 'modsmith_lang';
+        let currentLang = 'en';
+
+        function t(key) {
+            const dict = I18N[currentLang] || I18N.en;
+            return dict[key] !== undefined ? dict[key] : (I18N.en[key] !== undefined ? I18N.en[key] : key);
+        }
+
+        function applyLang(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            // title
+            document.title = t('page.title');
+
+            // textContent
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                const val = I18N[lang][key];
+                if (val !== undefined) el.textContent = val;
+            });
+
+            // innerHTML (for markup-bearing strings)
+            document.querySelectorAll('[data-i18n-html]').forEach(el => {
+                const key = el.dataset.i18nHtml;
+                const val = I18N[lang][key];
+                if (val !== undefined) el.innerHTML = val;
+            });
+
+            // placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                const val = I18N[lang][key];
+                if (val !== undefined) el.placeholder = val;
+            });
+
+            // lang switch active state
+            document.querySelectorAll('.lang-switch button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // refresh status badge (it may be running / done / failed)
+            refreshStatusBadge();
+
+            // refresh generate button label if not generating
+            const genBtn = document.getElementById('generate-btn');
+            if (genBtn && !genBtn.disabled) {
+                genBtn.innerHTML = '<span>⚡</span> <span data-i18n="btn.generate">' + t('btn.generate') + '</span>';
+            }
+
+            // refresh summarize button label if idle
+            const sumBtn = document.querySelector('.chat-action-btn.primary');
+            if (sumBtn && !sumBtn.disabled) {
+                sumBtn.innerHTML = '⚡ <span data-i18n="chat.summarize">' + t('chat.summarize') + '</span>';
+            }
+
+            localStorage.setItem(LANG_STORAGE_KEY, lang);
+        }
+
+        function setLang(lang) {
+            applyLang(lang);
+        }
+
+        function initLang() {
+            const saved = localStorage.getItem(LANG_STORAGE_KEY);
+            if (saved === 'zh' || saved === 'en') {
+                applyLang(saved);
+            } else {
+                applyLang('en'); // default English
+            }
+        }
+
+        // ============================================================
+        // App state
+        // ============================================================
         let currentTaskId = null;
         let currentProjectDir = null;
+        let currentStatusKey = 'status.idle';
+        let currentStatusCls = '';
 
         function show(el) { el.classList.remove('hidden'); }
         function hide(el) { el.classList.add('hidden'); }
 
-        function setStatus(text, cls) {
-            const el = document.getElementById('gen-status');
-            el.textContent = text;
-            el.className = 'card-badge' + (cls ? ' ' + cls : '');
+        function setStatus(key, cls) {
+            currentStatusKey = key;
+            currentStatusCls = cls || '';
+            refreshStatusBadge();
         }
 
-        function fillExample(text) {
+        function refreshStatusBadge() {
+            const el = document.getElementById('gen-status');
+            if (!el) return;
+            el.textContent = t(currentStatusKey);
+            el.className = 'card-badge' + (currentStatusCls ? ' ' + currentStatusCls : '');
+        }
+
+        function fillExample(btn) {
+            // Prefer the i18n text of the chip as the description
+            const key = btn.dataset.i18n;
+            const text = key ? t(key) : btn.textContent.trim();
             document.getElementById('description').value = text;
         }
 
         function switchTab(name, btn) {
-            // Switch button state
             document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
-            // Switch panel
             document.querySelectorAll('.preview-panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + name).classList.add('active');
         }
 
         function fileType(filename) {
-            if (filename.endsWith('.jar')) return { icon: '☕', cls: 'jar', tag: 'Installable mod' };
-            if (filename.endsWith('.zip')) return { icon: '📦', cls: 'zip', tag: 'Project source' };
-            if (filename.endsWith('.json')) return { icon: '{ }', cls: 'json', tag: 'Blueprint' };
-            return { icon: '📄', cls: 'json', tag: 'File' };
+            if (filename.endsWith('.jar')) return { icon: '☕', cls: 'jar', tag: t('dl.tag.jar') };
+            if (filename.endsWith('.zip')) return { icon: '📦', cls: 'zip', tag: t('dl.tag.zip') };
+            if (filename.endsWith('.json')) return { icon: '{ }', cls: 'json', tag: t('dl.tag.json') };
+            return { icon: '📄', cls: 'json', tag: t('dl.tag.file') };
         }
-async function autoVerify() {
-  if (!currentTaskId) return;
-  const msg = document.getElementById('verify-msg');
-  msg.textContent = 'Launching the game and running automatic verification. Please wait (may take 1–3 minutes)...';
-
-  try {
-    const resp = await fetch('/api/auto_verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task_id: currentTaskId }),
-    });
-    const result = await resp.json();
-    if (resp.ok) {
-      msg.innerHTML =
-        (result.success ? '✅ ' : '❌ ') + result.message +
-        '<br>Mod loaded: ' + (result.mod_loaded ? '✅' : '❌') +
-        '<br>Item registered: ' + (result.item_registered ? '✅' : '❌') +
-        (result.matched_lines && result.matched_lines.length
-          ? '<br><br>Matched log lines:<br>' + result.matched_lines.join('<br>')
-          : '');
-    } else {
-      msg.textContent = '❌ ' + (result.detail || 'Verification failed');
-    }
-  } catch (e) {
-    msg.textContent = '❌ Request failed: ' + e;
-  }
-}
 
         async function generate() {
             const btn = document.getElementById('generate-btn');
@@ -1144,21 +2315,21 @@ async function autoVerify() {
             const verifyMsg = document.getElementById('verify-msg');
 
             btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span> Generating…';
+            btn.innerHTML = '<span>⏳</span> <span>' + t('btn.generating') + '</span>';
             log.textContent = '';
             downloads.innerHTML = '';
             verifyMsg.textContent = '';
             hide(downloadsCard);
             hide(contentSection);
             hide(verifySection);
-            setStatus('Running', 'running');
+            setStatus('status.running', 'running');
 
             const description = document.getElementById('description').value.trim();
             if (!description) {
-                alert('Please fill in the mod description');
+                alert(t('msg.noDescription'));
                 btn.disabled = false;
-                btn.innerHTML = '<span>⚡</span> Generate mod';
-                setStatus('Idle', '');
+                btn.innerHTML = '<span>⚡</span> <span>' + t('btn.generate') + '</span>';
+                setStatus('status.idle', '');
                 return;
             }
 
@@ -1187,8 +2358,8 @@ async function autoVerify() {
                     const data = JSON.parse(e.data);
                     es.close();
                     btn.disabled = false;
-                    btn.innerHTML = '<span>⚡</span> Generate mod';
-                    setStatus('Done', 'done');
+                    btn.innerHTML = '<span>⚡</span> <span>' + t('btn.generate') + '</span>';
+                    setStatus('status.done', 'done');
 
                     currentProjectDir = data.project_dir;
 
@@ -1210,8 +2381,8 @@ async function autoVerify() {
                     }
                     show(downloadsCard);
 
-                    document.getElementById('blueprint-view').textContent = data.blueprint_content || '(empty)';
-                    document.getElementById('readme-view').textContent = data.readme_content || '(empty)';
+                    document.getElementById('blueprint-view').textContent = data.blueprint_content || '';
+                    document.getElementById('readme-view').textContent = data.readme_content || '';
                     show(contentSection);
 
                     show(verifySection);
@@ -1220,22 +2391,22 @@ async function autoVerify() {
                 es.addEventListener('error', () => {
                     es.close();
                     btn.disabled = false;
-                    btn.innerHTML = '<span>⚡</span> Generate mod';
-                    setStatus('Failed', '');
-                    log.textContent += '\n❌ Task failed\n';
+                    btn.innerHTML = '<span>⚡</span> <span>' + t('btn.generate') + '</span>';
+                    setStatus('status.failed', '');
+                    log.textContent += '\n' + t('msg.taskFailed') + '\n';
                 });
             } catch (e) {
                 btn.disabled = false;
-                btn.innerHTML = '<span>⚡</span> Generate mod';
-                setStatus('Failed', '');
-                log.textContent += `\n❌ Request failed: ${e}\n`;
+                btn.innerHTML = '<span>⚡</span> <span>' + t('btn.generate') + '</span>';
+                setStatus('status.failed', '');
+                log.textContent += '\n' + t('msg.requestFailed') + e + '\n';
             }
         }
 
         async function runClient() {
             if (!currentTaskId && !currentProjectDir) return;
             const msg = document.getElementById('verify-msg');
-            msg.innerHTML = '<span class="warn">Launching game, please wait…</span>';
+            msg.innerHTML = '<span class="warn">' + t('msg.launching') + '</span>';
             try {
                 const resp = await fetch('/api/run_client', {
                     method: 'POST',
@@ -1249,17 +2420,17 @@ async function autoVerify() {
                 if (resp.ok) {
                     msg.innerHTML = `<span class="ok">✅ ${result.message}</span>`;
                 } else {
-                    msg.innerHTML = `<span class="fail">❌ ${result.detail || 'Launch failed'}</span>`;
+                    msg.innerHTML = `<span class="fail">❌ ${result.detail || t('msg.launchFailed')}</span>`;
                 }
             } catch (e) {
-                msg.innerHTML = `<span class="fail">❌ Request failed: ${e}</span>`;
+                msg.innerHTML = `<span class="fail">${t('msg.requestFailed')}${e}</span>`;
             }
         }
 
         async function autoVerify() {
             if (!currentTaskId && !currentProjectDir) return;
             const msg = document.getElementById('verify-msg');
-            msg.innerHTML = '<span class="warn">Launching game and running automatic verification, may take 1–3 minutes…</span>';
+            msg.innerHTML = '<span class="warn">' + t('msg.verifying') + '</span>';
 
             try {
                 const resp = await fetch('/api/auto_verify', {
@@ -1275,7 +2446,7 @@ async function autoVerify() {
                 let result;
                 try { result = JSON.parse(text); }
                 catch {
-                    msg.innerHTML = `<span class="fail">❌ Backend returned non-JSON (HTTP ${resp.status}): ${text.slice(0, 200)}</span>`;
+                    msg.innerHTML = `<span class="fail">❌ ${t('msg.nonJson')} (HTTP ${resp.status}): ${text.slice(0, 200)}</span>`;
                     return;
                 }
 
@@ -1283,20 +2454,282 @@ async function autoVerify() {
                     const status = result.success ? 'ok' : 'fail';
                     const icon = result.success ? '✅' : '❌';
                     let html = `<span class="${status}">${icon} ${result.message}</span>`;
-                    html += `<br>Mod loaded: ${result.mod_loaded ? '✅' : '❌'}`;
-                    html += ` ｜ Item registered: ${result.item_registered ? '✅' : '❌'}`;
+                    html += `<br>${t('msg.modLoaded')}: ${result.mod_loaded ? '✅' : '❌'}`;
+                    html += ` ｜ ${t('msg.itemRegistered')}: ${result.item_registered ? '✅' : '❌'}`;
                     if (result.matched_lines && result.matched_lines.length) {
-                        html += '<br><br>Matched log lines:<br>';
+                        html += '<br><br>' + t('msg.matchedLogs') + '<br>';
                         html += result.matched_lines.map(l => `<code>${l}</code>`).join('<br>');
                     }
                     msg.innerHTML = html;
                 } else {
-                    msg.innerHTML = `<span class="fail">❌ ${result.detail || 'Verification failed'}</span>`;
+                    msg.innerHTML = `<span class="fail">❌ ${result.detail || t('msg.verifyFailed')}</span>`;
                 }
             } catch (e) {
-                msg.innerHTML = `<span class="fail">❌ Request failed: ${e}</span>`;
+                msg.innerHTML = `<span class="fail">${t('msg.requestFailed')}${e}</span>`;
             }
         }
+
+        // ============================================================
+        // Mode switching
+        // ============================================================
+        let currentMode = 'chat';
+
+        function switchMode(mode, btn) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            else {
+                const target = document.querySelector('.mode-tab[data-mode="' + mode + '"]');
+                if (target) target.classList.add('active');
+            }
+
+            document.querySelectorAll('.mode-panel').forEach(p => p.style.display = 'none');
+            const panel = document.getElementById('mode-' + mode);
+            if (panel) panel.style.display = 'block';
+
+            if (mode === 'chat') {
+                setTimeout(() => document.getElementById('chat-input').focus(), 100);
+            }
+        }
+
+        // ============================================================
+        // Chat logic
+        // ============================================================
+        const CHAT_STORAGE_KEY = 'modsmith_chat_history';
+        let chatSessionId = 'session-' + Date.now();
+        let chatHistory = [];
+
+        function loadChatHistoryFromStorage() {
+            try {
+                const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    chatHistory = data.history || [];
+                    chatSessionId = data.sessionId || chatSessionId;
+                    chatHistory.forEach(m => renderMessage(m.role, m.content, false));
+                }
+            } catch (e) {
+                console.warn('Failed to load chat history:', e);
+            }
+        }
+
+        function saveChatHistoryToStorage() {
+            try {
+                localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({
+                    history: chatHistory,
+                    sessionId: chatSessionId,
+                }));
+            } catch (e) {
+                console.warn('Failed to save chat history:', e);
+            }
+        }
+
+        function renderMessage(role, content, animate = true) {
+            const container = document.getElementById('chat-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'chat-message ' + role;
+            if (!animate) wrapper.style.animation = 'none';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = content;
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+            return bubble;
+        }
+
+        function renderTypingIndicator() {
+            const container = document.getElementById('chat-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'chat-message assistant';
+            wrapper.id = 'typing-indicator-wrapper';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = '🤖';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('typing-indicator-wrapper');
+            if (el) el.remove();
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const btn = document.getElementById('chat-send-btn');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            input.style.height = 'auto';
+
+            renderMessage('user', text);
+            chatHistory.push({ role: 'user', content: text });
+            saveChatHistoryToStorage();
+
+            btn.disabled = true;
+            renderTypingIndicator();
+
+            try {
+                await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: chatSessionId, message: text }),
+                });
+
+                const es = new EventSource(`/api/chat/stream/${chatSessionId}`);
+                let assistantBubble = null;
+
+                es.addEventListener('chunk', (e) => {
+                    const data = JSON.parse(e.data);
+                    if (!assistantBubble) {
+                        removeTypingIndicator();
+                        assistantBubble = renderMessage('assistant', '');
+                    }
+                    assistantBubble.textContent += data.text;
+                    const container = document.getElementById('chat-messages');
+                    container.scrollTop = container.scrollHeight;
+                });
+
+                es.addEventListener('done', (e) => {
+                    const data = JSON.parse(e.data);
+                    es.close();
+                    removeTypingIndicator();
+                    btn.disabled = false;
+                    chatHistory.push({ role: 'assistant', content: data.answer });
+                    saveChatHistoryToStorage();
+                });
+
+                es.addEventListener('error', () => {
+                    es.close();
+                    removeTypingIndicator();
+                    btn.disabled = false;
+                    if (!assistantBubble) {
+                        renderMessage('assistant', t('chat.replyFailed'));
+                    }
+                });
+            } catch (e) {
+                removeTypingIndicator();
+                btn.disabled = false;
+                renderMessage('assistant', t('chat.requestFailed') + e);
+            }
+        }
+
+        function handleChatKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChat();
+            }
+            setTimeout(() => {
+                const el = event.target;
+                el.style.height = 'auto';
+                el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+            }, 0);
+        }
+
+        function quickAsk(btn) {
+            const key = btn.dataset.i18n;
+            const text = key ? t(key) : btn.textContent.trim();
+            document.getElementById('chat-input').value = text;
+            sendChat();
+        }
+
+        async function clearChat() {
+            if (!confirm(t('chat.confirmClear'))) return;
+            chatHistory = [];
+            chatSessionId = 'session-' + Date.now();
+            localStorage.removeItem(CHAT_STORAGE_KEY);
+            document.getElementById('chat-messages').innerHTML = '';
+            try {
+                await fetch('/api/chat/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: chatSessionId }),
+                });
+            } catch (e) {
+                console.warn('Failed to clear backend session:', e);
+            }
+        }
+
+        async function summarizeToExecute(event) {
+            if (chatHistory.length === 0) {
+                alert(t('chat.emptyAlert'));
+                return;
+            }
+
+            const btn = event && event.currentTarget ? event.currentTarget :
+                document.querySelector('.chat-action-btn.primary');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ <span>' + t('btn.summarizing') + '</span>';
+            }
+
+            try {
+                const resp = await fetch('/api/chat/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: chatSessionId }),
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    alert(t('chat.summaryFailed') + (data.detail || t('chat.unknownError')));
+                    return;
+                }
+
+                const summary = (data.summary || '').trim();
+                if (!summary || summary === '未明确' || summary === 'Unspecified') {
+                    alert(t('chat.noSummary'));
+                    return;
+                }
+
+                // Switch to Execute mode
+                const executeTab = document.querySelector('.mode-tab[data-mode="execute"]');
+                switchMode('execute', executeTab);
+
+                // Fill description
+                const descEl = document.getElementById('description');
+                descEl.value = summary;
+                descEl.focus();
+                descEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {
+                alert(t('chat.requestFailed') + e);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '⚡ <span>' + t('chat.summarize') + '</span>';
+                }
+            }
+        }
+
+        // ============================================================
+        // Boot
+        // ============================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initLang();
+            loadChatHistoryFromStorage();
+
+            // Default tab: Chat
+            const chatTab = document.querySelector('.mode-tab[data-mode="chat"]');
+            if (chatTab) switchMode('chat', chatTab);
+        });
     </script>
 </body>
+
 </html>
