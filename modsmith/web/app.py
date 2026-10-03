@@ -184,3 +184,34 @@ async def run_client(req: RunClientRequest) -> dict:
         raise HTTPException(status_code=500, detail=f"Failed to launch: {e}")
 
     return {"success": True, "message": "Game is launching, please wait..."}
+
+    from modsmith.verifier.runtime import run_client_with_log
+
+
+class AutoVerifyRequest(BaseModel):
+    task_id: str
+
+
+@app.post("/api/auto_verify")
+async def auto_verify(req: AutoVerifyRequest) -> dict:
+    """Launch the game and automatically verify mod loading and item registration."""
+    if req.task_id not in TASKS:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task = TASKS[req.task_id]
+    project_dir = task.get("project_dir")
+    if not project_dir:
+        raise HTTPException(status_code=400, detail="Project directory does not exist")
+
+    project_path = Path(project_dir).resolve()
+    if not project_path.exists():
+        raise HTTPException(status_code=400, detail=f"Project directory does not exist: {project_path}")
+
+    # Run synchronously (long-running; acceptable during MVP)
+    result = run_client_with_log(project_path, timeout=180)
+    return {
+        "success": result.success,
+        "mod_loaded": result.mod_loaded,
+        "item_registered": result.item_registered,
+        "message": result.message,
+        "matched_lines": result.matched_lines,
+    }

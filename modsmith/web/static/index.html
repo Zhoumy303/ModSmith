@@ -1039,7 +1039,8 @@
             <div id="verify-section" class="card hidden">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <div class="card-icon">🎮</div>
+                        <div class="card-icon">🎮</div>     
+                    <button id="auto-verify-btn" onclick="autoVerify()" style="margin-left: 8px;">🔍 Auto Verify</button>
                         <div>
                             <div class="card-title">In-game verification</div>
                             <div class="card-subtitle">Launch and check if the mod works</div>
@@ -1105,6 +1106,33 @@
             if (filename.endsWith('.json')) return { icon: '{ }', cls: 'json', tag: 'Blueprint' };
             return { icon: '📄', cls: 'json', tag: 'File' };
         }
+async function autoVerify() {
+  if (!currentTaskId) return;
+  const msg = document.getElementById('verify-msg');
+  msg.textContent = 'Launching the game and running automatic verification. Please wait (may take 1–3 minutes)...';
+
+  try {
+    const resp = await fetch('/api/auto_verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task_id: currentTaskId }),
+    });
+    const result = await resp.json();
+    if (resp.ok) {
+      msg.innerHTML =
+        (result.success ? '✅ ' : '❌ ') + result.message +
+        '<br>Mod loaded: ' + (result.mod_loaded ? '✅' : '❌') +
+        '<br>Item registered: ' + (result.item_registered ? '✅' : '❌') +
+        (result.matched_lines && result.matched_lines.length
+          ? '<br><br>Matched log lines:<br>' + result.matched_lines.join('<br>')
+          : '');
+    } else {
+      msg.textContent = '❌ ' + (result.detail || 'Verification failed');
+    }
+  } catch (e) {
+    msg.textContent = '❌ Request failed: ' + e;
+  }
+}
 
         async function generate() {
             const btn = document.getElementById('generate-btn');
