@@ -9,3 +9,4 @@ output/
 .env
 test_output/
 generated_project
+test_resources_output

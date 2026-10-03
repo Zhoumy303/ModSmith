@@ -14,7 +14,7 @@ def generate_resources(blueprint: dict, project_dir: Path) -> None:
     mod_id = blueprint["mod_id"]
     assets_dir = project_dir / "src" / "main" / "resources" / "assets" / mod_id
 
-    # Create directories
+    # Create necessary directories
     (assets_dir / "items").mkdir(parents=True, exist_ok=True)
     (assets_dir / "models" / "item").mkdir(parents=True, exist_ok=True)
     (assets_dir / "textures" / "item").mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ def generate_resources(blueprint: dict, project_dir: Path) -> None:
     for item in blueprint["items"]:
         item_id = item["id"]
 
-        # Client item definition
+        # 1. Client item definition
         client_item = {
             "model": {
                 "type": "minecraft:model",
@@ -38,9 +38,14 @@ def generate_resources(blueprint: dict, project_dir: Path) -> None:
             json.dumps(client_item, indent=2, ensure_ascii=False), encoding="utf-8"
         )
 
-        # Model file
+        # 2. Model file: choose parent based on type
+        if item["type"] == "tool":
+            parent = "minecraft:item/handheld"
+        else:
+            parent = "minecraft:item/generated"
+
         model = {
-            "parent": "minecraft:item/generated",
+            "parent": parent,
             "textures": {
                 "layer0": f"{mod_id}:item/{item_id}"
             }
@@ -49,15 +54,18 @@ def generate_resources(blueprint: dict, project_dir: Path) -> None:
             json.dumps(model, indent=2, ensure_ascii=False), encoding="utf-8"
         )
 
-        # Translation keys
-        en_us[f"item.{mod_id}.{item_id}"] = item.get("display_name_en", item_id)
+        # 3. Translation
+        translation_key = f"item.{mod_id}.{item_id}"
+        en_us[translation_key] = item.get("display_name_en", item_id)
         if "display_name_zh" in item:
-            zh_cn[f"item.{mod_id}.{item_id}"] = item["display_name_zh"]
+            zh_cn[translation_key] = item["display_name_zh"]
 
-    # Write translation files
+    # Write English translations
     (assets_dir / "lang" / "en_us.json").write_text(
         json.dumps(en_us, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+    # Write Chinese translations (only when Chinese translations exist)
     if zh_cn:
         (assets_dir / "lang" / "zh_cn.json").write_text(
             json.dumps(zh_cn, indent=2, ensure_ascii=False), encoding="utf-8"
