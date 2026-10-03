@@ -7,3 +7,5 @@ dist/
 output/
 .pytest_cache/
 .env
+test_output/
+
