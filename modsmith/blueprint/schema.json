@@ -13,7 +13,7 @@
     "mod_id": {
       "type": "string",
       "description": "Unique identifier of the mod. Only lowercase letters, digits, and hyphens, e.g. example-mod",
-      "pattern": "^[a-z][a-z0-9-]*$"
+      "pattern": "^[a-z][a-z0_9]*$"
     },
     "package_name": {
       "type": "string",

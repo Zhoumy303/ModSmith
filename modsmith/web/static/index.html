@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModSmith · Forge Fabric mods from natural language</title>
+    <style>
+        :root {
+            --bg: #070b16;
+            --bg-soft: #0d1322;
+            --surface: #111a2e;
+            --surface-2: #16203a;
+            --surface-3: #1c2a47;
+            --border: #1e2d4a;
+            --border-light: #2b3d5f;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --text-muted: #5a6b8a;
+            --emerald: #10b981;
+            --emerald-bright: #34d399;
+            --emerald-dark: #059669;
+            --emerald-glow: rgba(16, 185, 129, 0.15);
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --cyan: #22d3ee;
+            --violet: #a78bfa;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+
+            /* Font stacks: use system fonts */
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue",
+                         Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Menlo", "Monaco", "Consolas", "Liberation Mono",
+                         "Courier New", monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background grid + glow */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(30, 45, 74, 0.25) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 45, 74, 0.25) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 100% 60% at 50% 0%, black 0%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 100% 60% at 50% 0%, black 0%, transparent 75%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow-1 {
+            width: 600px;
+            height: 600px;
+            top: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.22), transparent 70%);
+        }
+
+        .bg-glow-2 {
+            width: 500px;
+            height: 500px;
+            top: 100px;
+            right: -150px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent 70%);
+        }
+
+        /* ============ Floating top capsule nav ============ */
+        .topnav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(13, 19, 34, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(43, 61, 95, 0.6);
+            border-radius: 999px;
+            padding: 8px 10px 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .topnav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .topnav-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            box-shadow: 0 0 16px var(--emerald-glow);
+        }
+
+        .topnav-name {
+            font-size: 14.5px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .topnav-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: var(--emerald-bright);
+            background: var(--emerald-glow);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 1px 6px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        .topnav-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+        }
+
+        .topnav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .topnav-links a {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 999px;
+            transition: all 0.15s;
+        }
+
+        .topnav-links a:hover {
+            color: var(--text);
+            background: var(--surface-2);
+        }
+
+        .topnav-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: var(--text-dim);
+            padding: 5px 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+
+        .topnav-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 6px var(--emerald);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .topnav-github {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: var(--text-dim);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+        }
+
+        .topnav-github:hover {
+            color: var(--emerald-bright);
+            border-color: var(--emerald);
+            background: var(--surface-2);
+        }
+
+        .topnav-github svg {
+            width: 15px;
+            height: 15px;
+            fill: currentColor;
+        }
+
+        /* ============ Page container ============ */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 120px 48px 80px;
+        }
+
+        /* ============ Hero section (left-aligned big title) ============ */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 60px;
+            align-items: end;
+            margin-bottom: 80px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-left .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--emerald-bright);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .hero-left .eyebrow::before {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--emerald);
+        }
+
+        .hero h1 {
+            font-size: clamp(44px, 6vw, 84px);
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 0.98;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .grad {
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 .outline {
+            color: transparent;
+            -webkit-text-stroke: 1.5px var(--border-light);
+        }
+
+        .hero-lead {
+            font-size: 16px;
+            color: var(--text-dim);
+            max-width: 520px;
+            line-height: 1.7;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            flex-shrink: 0;
+        }
+
+        .hero-stat {
+            text-align: right;
+        }
+
+        .hero-stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1;
+            color: var(--text);
+            font-feature-settings: 'tnum';
+        }
+
+        .hero-stat-value .unit {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--emerald-bright);
+            margin-left: 2px;
+            letter-spacing: 0;
+        }
+
+        .hero-stat-label {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============ Workspace grid ============ */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* ============ Card ============ */
+        .card {
+            background: linear-gradient(180deg, var(--surface) 0%, var(--bg-soft) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .card-subtitle {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .card-badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: var(--surface-2);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .card-badge.running {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .card-badge.done {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald-bright);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        /* ============ Input section ============ */
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .example-chip {
+            font-size: 12px;
+            color: var(--text-dim);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .example-chip:hover {
+            color: var(--emerald-bright);
+            border-color: var(--emerald);
+            background: var(--emerald-glow);
+            transform: translateY(-1px);
+        }
+
+        .field { margin-bottom: 16px; }
+        .field:last-child { margin-bottom: 0; }
+
+        .field label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            padding: 12px 14px;
+            transition: all 0.15s;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 4px var(--emerald-glow);
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder { color: var(--text-muted); }
+
+        .field textarea {
+            height: 100px;
+            resize: vertical;
+            line-height: 1.55;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ============ Buttons ============ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+            color: #022c22;
+            border: none;
+            padding: 14px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: -0.1px;
+            box-shadow: 0 8px 20px -8px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -8px rgba(16, 185, 129, 0.7);
+        }
+
+        .btn:active:not(:disabled) { transform: translateY(0); }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-full { width: 100%; }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            font-weight: 600;
+            padding: 11px 18px;
+            font-size: 13px;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--surface-3);
+            border-color: var(--emerald);
+            color: var(--emerald-bright);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px -8px var(--emerald-glow);
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ============ Terminal ============ */
+        .terminal {
+            background: #03060d;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 380px;
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(13, 19, 34, 0.8);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #28c840; }
+
+        .terminal-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 4px;
+            font-family: var(--font-mono);
+            letter-spacing: 0.3px;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 18px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.85;
+            color: #cbd5e1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .terminal-body::-webkit-scrollbar { width: 8px; }
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .terminal-body::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+        /* ============ Preview (with tabs) ============ */
+        .preview-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 14px;
+        }
+
+        .preview-tab {
+            flex: 1;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .preview-tab:hover { color: var(--text-dim); }
+
+        .preview-tab.active {
+            background: var(--surface-2);
+            color: var(--emerald-bright);
+            box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.4);
+        }
+
+        .preview-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #cbd5e1;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.7;
+            height: 300px;
+            overflow-y: auto;
+            padding: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .preview-content::-webkit-scrollbar { width: 8px; }
+        .preview-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .preview-panel { display: none; }
+        .preview-panel.active { display: block; }
+
+        /* ============ Download list ============ */
+        .download-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .download-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .download-item:hover {
+            background: var(--surface-2);
+            border-color: var(--emerald);
+            transform: translateX(4px);
+        }
+
+        .download-item .file-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+
+        .download-item .file-icon.jar {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.08));
+            color: var(--emerald-bright);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .download-item .file-icon.zip {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.08));
+            color: var(--violet);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .download-item .file-icon.json {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(34, 211, 238, 0.05));
+            color: var(--cyan);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        .download-item .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .download-item .file-name {
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: var(--font-mono);
+        }
+
+        .download-item .file-tag {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .download-item .file-arrow {
+            color: var(--text-muted);
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .download-item:hover .file-arrow {
+            color: var(--emerald-bright);
+            transform: translateX(3px);
+        }
+
+        /* ============ Verification messages ============ */
+        #verify-msg {
+            margin-top: 16px;
+            font-size: 12.5px;
+            line-height: 1.85;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        #verify-msg .ok { color: var(--emerald-bright); font-weight: 600; }
+        #verify-msg .fail { color: var(--red); font-weight: 600; }
+        #verify-msg .warn { color: var(--amber); font-weight: 600; }
+
+        #verify-msg code {
+            display: inline-block;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 11.5px;
+            color: var(--emerald-bright);
+            margin: 2px 0;
+        }
+
+        /* ============ Hidden / hints ============ */
+        .hidden { display: none !important; }
+
+        .hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ============ Footer ============ */
+        .footer {
+            max-width: 1440px;
+            margin: 80px auto 0;
+            padding: 32px 48px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-brand .logo {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-bright));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover { color: var(--emerald-bright); }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 1100px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                align-items: start;
+            }
+            .hero-stats { justify-content: flex-start; }
+            .hero-stat { text-align: left; }
+        }
+
+        @media (max-width: 900px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+            .page { padding: 100px 20px 60px; }
+            .footer { padding: 24px 20px 0; }
+        }
+
+        @media (max-width: 640px) {
+            .topnav {
+                padding: 6px 8px 6px 12px;
+                gap: 10px;
+            }
+            .topnav-links a,
+            .topnav-status span {
+                display: none;
+            }
+            .topnav-divider { display: none; }
+            .field-row { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 40px; letter-spacing: -1.5px; }
+            .hero-stats { gap: 24px; }
+            .hero-stat-value { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Floating top capsule -->
+    <nav class="topnav">
+        <a href="/" class="topnav-brand">
+            <div class="topnav-logo">⚒</div>
+            <span class="topnav-name">ModSmith</span>
+            <span class="topnav-badge">BETA</span>
+        </a>
+        <div class="topnav-divider"></div>
+        <div class="topnav-links">
+            <a href="#workspace">Generate</a>
+            <a href="#verify">Verify</a>
+        </div>
+        <div class="topnav-divider"></div>
+        <div class="topnav-status">
+            <span class="dot"></span>
+            <span>Service running</span>
+        </div>
+        <a href="https://github.com/Zhoumy303/ModSmith" target="_blank" rel="noopener" class="topnav-github" title="GitHub">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+        </a>
+    </nav>
+
+    <div class="page">
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-left">
+                <div class="eyebrow">AI-Native Fabric Mod Generator</div>
+                <h1>
+                    Forge <span class="grad">Fabric</span> mods<br>
+                    from <span class="outline">natural language</span>
+                </h1>
+                <p class="hero-lead">
+                    Describe your idea, and ModSmith automatically generates a blueprint,
+                    compiles the project, packages the output, and helps you verify it in-game.
+                </p>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">1<span class="unit">min</span></div>
+                    <div class="hero-stat-label">From idea to mod</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">3<span class="unit">types</span></div>
+                    <div class="hero-stat-label">Item types</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">100<span class="unit">%</span></div>
+                    <div class="hero-stat-label">Open source</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workspace grid -->
+        <div class="workspace" id="workspace">
+
+            <!-- Input card -->
+            <div class="card" id="generate">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">✨</div>
+                        <div>
+                            <div class="card-title">Describe your mod</div>
+                            <div class="card-subtitle">Say what you want in one sentence</div>
+                        </div>
+                    </div>
+                    <span class="card-badge" id="gen-status">Idle</span>
+                </div>
+
+                <div class="examples">
+                    <button class="example-chip" onclick="fillExample('Create an apple that restores 4 hunger points when eaten')">🍎 Healing apple</button>
+                    <button class="example-chip" onclick="fillExample('Create a Guidite sword with 455 durability')">⚔️ Guidite sword</button>
+                    <button class="example-chip" onclick="fillExample('Create a basic item called Ruby')">💎 Ruby</button>
+                </div>
+
+                <div class="field">
+                    <textarea id="description" placeholder="e.g.: Create an apple that restores 4 hunger points when eaten"></textarea>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="mod_id">Mod ID</label>
+                        <input id="mod_id" value="example-mod">
+                    </div>
+                    <div class="field">
+                        <label for="package_name">Package name</label>
+                        <input id="package_name" value="com.example">
+                    </div>
+                </div>
+                <button id="generate-btn" class="btn btn-full" onclick="generate()">
+                    <span>⚡</span> Generate mod
+                </button>
+                <p class="hint">
+                    <span>💡</span>
+                    Generation calls the LLM, compiles the project, and packages it. Usually takes 1–3 minutes.
+                </p>
+            </div>
+
+            <!-- Log card -->
+            <div class="card" id="log-card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">📋</div>
+                        <div>
+                            <div class="card-title">Real-time log</div>
+                            <div class="card-subtitle">Each step of the generation</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <div class="terminal-dots">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                        </div>
+                        <span class="terminal-title">modsmith — output</span>
+                    </div>
+                    <div id="log" class="terminal-body"></div>
+                </div>
+            </div>
+
+            <!-- Preview card -->
+            <div id="content-section" class="card hidden">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">📄</div>
+                        <div>
+                            <div class="card-title">Generated content preview</div>
+                            <div class="card-subtitle">Blueprint and README</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-tabs">
+                    <button class="preview-tab active" onclick="switchTab('blueprint', this)">Blueprint · blueprint.json</button>
+                    <button class="preview-tab" onclick="switchTab('readme', this)">README</button>
+                </div>
+                <div class="preview-panel active" id="panel-blueprint">
+                    <pre class="preview-content" id="blueprint-view"></pre>
+                </div>
+                <div class="preview-panel" id="panel-readme">
+                    <pre class="preview-content" id="readme-view"></pre>
+                </div>
+            </div>
+
+            <!-- Download + verify cards -->
+            <div class="card hidden" id="downloads-card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">📦</div>
+                        <div>
+                            <div class="card-title">Downloads</div>
+                            <div class="card-subtitle">Click to download locally</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="downloads" class="download-grid"></div>
+            </div>
+
+            <div id="verify-section" class="card hidden">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <div class="card-icon">🎮</div>
+                        <div>
+                            <div class="card-title">In-game verification</div>
+                            <div class="card-subtitle">Launch and check if the mod works</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button id="verify-btn" class="btn btn-secondary" onclick="runClient()">
+                        🎮 Launch game
+                    </button>
+                    <button id="auto-verify-btn" class="btn btn-secondary" onclick="autoVerify()">
+                        🔍 Log verification
+                    </button>
+                </div>
+                <div id="verify-msg"></div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-brand">
+                <div class="logo">⚒</div>
+                <span>ModSmith · Forge Fabric mods from natural language</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/Zhoumy303/ModSmith" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://github.com/Zhoumy303/ModSmith/issues" target="_blank" rel="noopener">Report an issue</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        let currentTaskId = null;
+        let currentProjectDir = null;
+
+        function show(el) { el.classList.remove('hidden'); }
+        function hide(el) { el.classList.add('hidden'); }
+
+        function setStatus(text, cls) {
+            const el = document.getElementById('gen-status');
+            el.textContent = text;
+            el.className = 'card-badge' + (cls ? ' ' + cls : '');
+        }
+
+        function fillExample(text) {
+            document.getElementById('description').value = text;
+        }
+
+        function switchTab(name, btn) {
+            // Switch button state
+            document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            // Switch panel
+            document.querySelectorAll('.preview-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+        }
+
+        function fileType(filename) {
+            if (filename.endsWith('.jar')) return { icon: '☕', cls: 'jar', tag: 'Installable mod' };
+            if (filename.endsWith('.zip')) return { icon: '📦', cls: 'zip', tag: 'Project source' };
+            if (filename.endsWith('.json')) return { icon: '{ }', cls: 'json', tag: 'Blueprint' };
+            return { icon: '📄', cls: 'json', tag: 'File' };
+        }
+
+        async function generate() {
+            const btn = document.getElementById('generate-btn');
+            const log = document.getElementById('log');
+            const downloads = document.getElementById('downloads');
+            const downloadsCard = document.getElementById('downloads-card');
+            const contentSection = document.getElementById('content-section');
+            const verifySection = document.getElementById('verify-section');
+            const verifyMsg = document.getElementById('verify-msg');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Generating…';
+            log.textContent = '';
+            downloads.innerHTML = '';
+            verifyMsg.textContent = '';
+            hide(downloadsCard);
+            hide(contentSection);
+            hide(verifySection);
+            setStatus('Running', 'running');
+
+            const description = document.getElementById('description').value.trim();
+            if (!description) {
+                alert('Please fill in the mod description');
+                btn.disabled = false;
+                btn.innerHTML = '<span>⚡</span> Generate mod';
+                setStatus('Idle', '');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description,
+                        mod_id: document.getElementById('mod_id').value.trim(),
+                        package_name: document.getElementById('package_name').value.trim(),
+                    }),
+                });
+                const { task_id } = await resp.json();
+                currentTaskId = task_id;
+
+                const es = new EventSource(`/api/stream/${task_id}`);
+
+                es.addEventListener('log', (e) => {
+                    const data = JSON.parse(e.data);
+                    log.textContent += data.message + '\n';
+                    log.scrollTop = log.scrollHeight;
+                });
+
+                es.addEventListener('done', (e) => {
+                    const data = JSON.parse(e.data);
+                    es.close();
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>⚡</span> Generate mod';
+                    setStatus('Done', 'done');
+
+                    currentProjectDir = data.project_dir;
+
+                    for (const [key, path] of Object.entries(data.result)) {
+                        const filename = path.split('/').pop();
+                        const ft = fileType(filename);
+                        const a = document.createElement('a');
+                        a.href = `/api/download/${task_id}/${filename}`;
+                        a.className = 'download-item';
+                        a.innerHTML = `
+                            <div class="file-icon ${ft.cls}">${ft.icon}</div>
+                            <div class="file-info">
+                                <div class="file-name">${filename}</div>
+                                <div class="file-tag">${ft.tag}</div>
+                            </div>
+                            <div class="file-arrow">→</div>
+                        `;
+                        downloads.appendChild(a);
+                    }
+                    show(downloadsCard);
+
+                    document.getElementById('blueprint-view').textContent = data.blueprint_content || '(empty)';
+                    document.getElementById('readme-view').textContent = data.readme_content || '(empty)';
+                    show(contentSection);
+
+                    show(verifySection);
+                });
+
+                es.addEventListener('error', () => {
+                    es.close();
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>⚡</span> Generate mod';
+                    setStatus('Failed', '');
+                    log.textContent += '\n❌ Task failed\n';
+                });
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>⚡</span> Generate mod';
+                setStatus('Failed', '');
+                log.textContent += `\n❌ Request failed: ${e}\n`;
+            }
+        }
+
+        async function runClient() {
+            if (!currentTaskId && !currentProjectDir) return;
+            const msg = document.getElementById('verify-msg');
+            msg.innerHTML = '<span class="warn">Launching game, please wait…</span>';
+            try {
+                const resp = await fetch('/api/run_client', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        task_id: currentTaskId || "",
+                        project_dir: currentProjectDir || "",
+                    }),
+                });
+                const result = await resp.json();
+                if (resp.ok) {
+                    msg.innerHTML = `<span class="ok">✅ ${result.message}</span>`;
+                } else {
+                    msg.innerHTML = `<span class="fail">❌ ${result.detail || 'Launch failed'}</span>`;
+                }
+            } catch (e) {
+                msg.innerHTML = `<span class="fail">❌ Request failed: ${e}</span>`;
+            }
+        }
+
+        async function autoVerify() {
+            if (!currentTaskId && !currentProjectDir) return;
+            const msg = document.getElementById('verify-msg');
+            msg.innerHTML = '<span class="warn">Launching game and running automatic verification, may take 1–3 minutes…</span>';
+
+            try {
+                const resp = await fetch('/api/auto_verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        task_id: currentTaskId || "",
+                        project_dir: currentProjectDir || "",
+                    }),
+                });
+
+                const text = await resp.text();
+                let result;
+                try { result = JSON.parse(text); }
+                catch {
+                    msg.innerHTML = `<span class="fail">❌ Backend returned non-JSON (HTTP ${resp.status}): ${text.slice(0, 200)}</span>`;
+                    return;
+                }
+
+                if (resp.ok) {
+                    const status = result.success ? 'ok' : 'fail';
+                    const icon = result.success ? '✅' : '❌';
+                    let html = `<span class="${status}">${icon} ${result.message}</span>`;
+                    html += `<br>Mod loaded: ${result.mod_loaded ? '✅' : '❌'}`;
+                    html += ` ｜ Item registered: ${result.item_registered ? '✅' : '❌'}`;
+                    if (result.matched_lines && result.matched_lines.length) {
+                        html += '<br><br>Matched log lines:<br>';
+                        html += result.matched_lines.map(l => `<code>${l}</code>`).join('<br>');
+                    }
+                    msg.innerHTML = html;
+                } else {
+                    msg.innerHTML = `<span class="fail">❌ ${result.detail || 'Verification failed'}</span>`;
+                }
+            } catch (e) {
+                msg.innerHTML = `<span class="fail">❌ Request failed: ${e}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

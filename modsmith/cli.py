@@ -77,3 +77,13 @@ def generate(
 
 if __name__ == "__main__":
     app()
+
+@app.command()
+def web(
+    host: str = typer.Option("127.0.0.1", "--host", help="Listen address"),
+    port: int = typer.Option(8000, "--port", "-p", help="Listen port"),
+) -> None:
+    """Launch the Web UI service."""
+    import uvicorn
+    console.print(f"🌐 Starting Web UI: http://{host}:{port}")
+    uvicorn.run("modsmith.web.app:app", host=host, port=port, reload=False)
