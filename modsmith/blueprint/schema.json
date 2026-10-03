@@ -1,38 +1,154 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModSmith Blueprint",
   "type": "object",
-  "required": ["mod_id", "package_name", "minecraft_version", "fabric_loader_version", "items"],
+  "required": [
+    "mod_id",
+    "package_name",
+    "minecraft_version",
+    "fabric_loader_version",
+    "items"
+  ],
   "properties": {
-    "mod_id": { "type": "string" },
-    "package_name": { "type": "string" },
-    "minecraft_version": { "type": "string" },
-    "fabric_loader_version": { "type": "string" },
+    "mod_id": {
+      "type": "string",
+      "description": "Unique identifier of the mod. Only lowercase letters, digits, and hyphens, e.g. example-mod",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "package_name": {
+      "type": "string",
+      "description": "Java package name, e.g. com.example",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+    },
+    "minecraft_version": {
+      "type": "string",
+      "description": "Target Minecraft version, determined by system configuration"
+    },
+    "fabric_loader_version": {
+      "type": "string",
+      "description": "Fabric Loader version, determined by system configuration"
+    },
     "items": {
       "type": "array",
+      "description": "List of items to generate",
       "items": {
         "type": "object",
         "required": ["id", "type", "display_name_en"],
         "properties": {
-          "id": { "type": "string" },
-          "type": { "enum": ["basic", "food", "fuel", "tool"] },
-          "display_name_en": { "type": "string" },
-          "display_name_zh": { "type": "string" },
-          "nutrition": { "type": "integer" },
-          "saturation": { "type": "number" },
-          "always_edible": { "type": "boolean" },
+          "id": {
+            "type": "string",
+            "description": "Unique item ID. Only lowercase letters, digits, and underscores, e.g. healing_apple",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["basic", "food", "fuel", "tool"],
+            "description": "Item type"
+          },
+          "display_name_en": {
+            "type": "string",
+            "description": "English display name"
+          },
+          "display_name_zh": {
+            "type": "string",
+            "description": "Chinese display name"
+          },
+          "texture": {
+            "type": "string",
+            "description": "Texture path; 'auto' means auto-generate",
+            "default": "auto"
+          },
+          "nutrition": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Hunger restored by the food (required only when type=food)"
+          },
+          "saturation": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Saturation added by the food (required only when type=food)"
+          },
+          "always_edible": {
+            "type": "boolean",
+            "description": "Whether always edible (effective only when type=food)",
+            "default": false
+          },
           "effects": {
             "type": "array",
+            "description": "Status effects applied on consumption (effective only when type=food)",
             "items": {
               "type": "object",
+              "required": ["effect", "duration_ticks", "amplifier"],
               "properties": {
-                "effect": { "type": "string" },
-                "duration_ticks": { "type": "integer" },
-                "amplifier": { "type": "integer" }
+                "effect": {
+                  "type": "string",
+                  "description": "Effect ID, e.g. regeneration, speed"
+                },
+                "duration_ticks": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Duration (in ticks; 20 ticks = 1 second)"
+                },
+                "amplifier": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Effect level; 0 means level I, 1 means level II"
+                }
               }
             }
           },
-          "texture": { "type": "string" }
-        }
+          "burn_time": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Burn time (in ticks; required only when type=fuel)"
+          },
+          "tool_type": {
+            "type": "string",
+            "enum": ["sword", "axe", "pickaxe", "shovel", "hoe"],
+            "description": "Tool type (required only when type=tool)"
+          },
+          "durability": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Durability (required only when type=tool)"
+          },
+          "mining_speed": {
+            "type": "number",
+            "minimum": 0.1,
+            "description": "Mining speed (required only when type=tool)"
+          },
+          "attack_damage": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Attack damage (required only when type=tool)"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "type": { "const": "food" } }
+            },
+            "then": {
+              "required": ["nutrition", "saturation", "always_edible"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "fuel" } }
+            },
+            "then": {
+              "required": ["burn_time"]
+            }
+          },
+          {
+            "if": {
+              "properties": { "type": { "const": "tool" } }
+            },
+            "then": {
+              "required": ["tool_type", "durability", "mining_speed", "attack_damage"]
+            }
+          }
+        ]
       }
     }
   }
