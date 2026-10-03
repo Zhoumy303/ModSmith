@@ -1,17 +1,25 @@
 {
-  "id": "guidite_sword",
-  "type": "tool",
-  "display_name_en": "Guidite Sword",
-  "display_name_zh": "基迪特剑",
-  "tool_type": "sword",
-  "durability": 455,
-  "mining_speed": 5.0,
-  "attack_damage": 1.5,
-  "visual": {
-    "shape": "blade",
-    "primary_color": "#94a3b8",
-    "accent_color": "#cbd5e1",
-    "pattern": "none"
-  },
-  "texture": "auto"
+  "mod_id": "example-mod",
+  "package_name": "com.example.examplemod",
+  "minecraft_version": "26.1.2",
+  "fabric_loader_version": "0.19.5",
+  "items": [
+    {
+      "id": "guidite_sword",
+      "type": "tool",
+      "display_name_en": "Guidite Sword",
+      "display_name_zh": "基迪特剑",
+      "tool_type": "sword",
+      "durability": 455,
+      "mining_speed": 5.0,
+      "attack_damage": 1.5,
+      "visual": {
+        "shape": "blade",
+        "primary_color": "#94a3b8",
+        "accent_color": "#cbd5e1",
+        "pattern": "none"
+      },
+      "texture": "auto"
+    }
+  ]
 }

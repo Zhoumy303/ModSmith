@@ -1,13 +1,21 @@
 {
-  "id": "ruby",
-  "type": "basic",
-  "display_name_en": "Ruby",
-  "display_name_zh": "红宝石",
-  "visual": {
-    "shape": "crystal",
-    "primary_color": "#dc2626",
-    "accent_color": "#fca5a5",
-    "pattern": "sparkle"
-  },
-  "texture": "auto"
+  "mod_id": "example-mod",
+  "package_name": "com.example.examplemod",
+  "minecraft_version": "26.1.2",
+  "fabric_loader_version": "0.19.5",
+  "items": [
+    {
+      "id": "ruby",
+      "type": "basic",
+      "display_name_en": "Ruby",
+      "display_name_zh": "红宝石",
+      "visual": {
+        "shape": "crystal",
+        "primary_color": "#dc2626",
+        "accent_color": "#fca5a5",
+        "pattern": "sparkle"
+      },
+      "texture": "auto"
+    }
+  ]
 }
