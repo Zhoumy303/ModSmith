@@ -11,7 +11,6 @@ public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Hello Fabric world from {{ mod_name }}!");
-        // Note: ModItemsGenerated will be generated in a later task; do not call it here for now
-        // ModItemsGenerated.initialize();
+        ModItemsGenerated.initialize();
     }
 }

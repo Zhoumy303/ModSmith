@@ -2,19 +2,92 @@ package {{ package_name }};
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+
+import java.util.List;
+import java.util.function.Function;
 
 public class ModItems {
-    {% for item in items %}
-    public static final Item {{ item.id | upper }} = register(ModItemIds.{{ item.id | upper }}, Item::new, new Item.Properties());
-    {% endfor %}
+{% for item in items %}
+{% if item.type == "food" %}
+    public static final FoodProperties {{ item.id | upper }}_FOOD = new FoodProperties.Builder()
+        .nutrition({{ item.nutrition }})
+        .saturationModifier({{ item.saturation }}f)
+{% if item.always_edible %}
+        .alwaysEdible()
+{% endif %}
+        .build();
 
-    private static Item register(ResourceKey<Item> key, Function<Item.Properties, Item> factory, Item.Properties settings) {
-        Item item = factory.apply(settings.setId(key));
-        return Registry.register(BuiltInRegistries.ITEM, key, item);
+    public static final Consumable {{ item.id | upper }}_CONSUMABLE = Consumables.defaultFood()
+{% if item.effects %}
+        .onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
+{% for effect in item.effects %}
+            new MobEffectInstance(MobEffects.{{ effect.effect | upper }}, {{ effect.duration_ticks }}, {{ effect.amplifier }}){% if not loop.last %},{% endif %}
+{% endfor %}
+        ), 1.0f))
+{% endif %}
+        .build();
+{% endif %}
+{% if item.type == "tool" %}
+    public static final ToolMaterial {{ item.id | upper }}_MATERIAL = new ToolMaterial(
+        BlockTags.INCORRECT_FOR_IRON_TOOL,
+        {{ item.durability }},
+        {{ item.mining_speed }}f,
+        {{ item.attack_damage }}f,
+        22,
+        ItemTags.IRON_TOOL_MATERIALS
+    );
+{% endif %}
+{% endfor %}
+
+{% for item in items %}
+    public static final Item {{ item.id | upper }} = register(
+        ModItemIds.{{ item.id | upper }},
+{% if item.type == "basic" %}
+        Item::new,
+        new Item.Properties()
+{% elif item.type == "food" %}
+        Item::new,
+        new Item.Properties().food({{ item.id | upper }}_FOOD, {{ item.id | upper }}_CONSUMABLE)
+{% elif item.type == "fuel" %}
+        Item::new,
+        new Item.Properties()
+{% elif item.type == "tool" %}
+{% if item.tool_type == "sword" %}
+        Item::new,
+        new Item.Properties().sword({{ item.id | upper }}_MATERIAL, {{ item.attack_damage }}f, 1f)
+{% elif item.tool_type == "axe" %}
+        Item::new,
+        new Item.Properties().axe({{ item.id | upper }}_MATERIAL, {{ item.attack_damage }}f, -3.0f)
+{% elif item.tool_type == "pickaxe" %}
+        Item::new,
+        new Item.Properties().pickaxe({{ item.id | upper }}_MATERIAL, {{ item.attack_damage }}f, -2.8f)
+{% elif item.tool_type == "shovel" %}
+        Item::new,
+        new Item.Properties().shovel({{ item.id | upper }}_MATERIAL, {{ item.attack_damage }}f, -3.0f)
+{% elif item.tool_type == "hoe" %}
+        Item::new,
+        new Item.Properties().hoe({{ item.id | upper }}_MATERIAL, {{ item.attack_damage }}f, -2.0f)
+{% endif %}
+{% endif %}
+    );
+{% endfor %}
+
+    public static Item register(ResourceKey<Item> itemKey, Function<Item.Properties, Item> itemFactory, Item.Properties settings) {
+        Item item = itemFactory.apply(settings.setId(itemKey));
+        return Registry.register(BuiltInRegistries.ITEM, itemKey, item);
     }
 
     public static void initialize() {
-        // Empty initialization to trigger class loading
     }
 }
