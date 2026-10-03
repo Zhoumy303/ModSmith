@@ -12,3 +12,5 @@ generated_project
 test_resources_output
 test_textures_output
 build_test_project
+pipeline_output
+pipeline_project
