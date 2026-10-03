@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "modsmith"
+version = "0.1.0"
+description = "Forge Fabric mods from natural language"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "jsonschema>=4.23.0",
+    "jinja2>=3.1.4",
+    "pillow>=10.4.0",
+    "typer>=0.15.0",
+    "rich>=13.9.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-mock>=3.14.0",
+]
+
+[project.scripts]
+modsmith = "modsmith.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["modsmith*"]

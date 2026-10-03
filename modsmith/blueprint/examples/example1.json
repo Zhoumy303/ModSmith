@@ -1,0 +1,21 @@
+{
+  "mod_id": "example-mod",
+  "package_name": "com.example",
+  "minecraft_version": "26.1.2",
+  "fabric_loader_version": "0.19.5",
+  "items": [
+    {
+      "id": "healing_apple",
+      "type": "food",
+      "display_name_en": "Healing Apple",
+      "display_name_zh": "治愈苹果",
+      "nutrition": 4,
+      "saturation": 0.3,
+      "always_edible": true,
+      "effects": [
+        { "effect": "regeneration", "duration_ticks": 200, "amplifier": 0 }
+      ],
+      "texture": "auto"
+    }
+  ]
+}

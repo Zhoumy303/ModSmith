@@ -1,0 +1,1 @@
+"""Blueprint definition, schema, and validation."""

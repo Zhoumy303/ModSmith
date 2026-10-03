@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["mod_id", "package_name", "minecraft_version", "fabric_loader_version", "items"],
+  "properties": {
+    "mod_id": { "type": "string" },
+    "package_name": { "type": "string" },
+    "minecraft_version": { "type": "string" },
+    "fabric_loader_version": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "display_name_en"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "enum": ["basic", "food", "fuel", "tool"] },
+          "display_name_en": { "type": "string" },
+          "display_name_zh": { "type": "string" },
+          "nutrition": { "type": "integer" },
+          "saturation": { "type": "number" },
+          "always_edible": { "type": "boolean" },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "effect": { "type": "string" },
+                "duration_ticks": { "type": "integer" },
+                "amplifier": { "type": "integer" }
+              }
+            }
+          },
+          "texture": { "type": "string" }
+        }
+      }
+    }
+  }
+}
